@@ -280,7 +280,7 @@ export const EventKind = z.enum([
   "agent.eat", "agent.rent", "agent.evicted", "agent.reflect", "agent.letter",
   "relation.change", "economy.price", "weather.change", "law.proposed", "law.vote", "law.passed", "law.failed",
   "deal.offered", "deal.accepted", "deal.refused", "deal.kept", "deal.broken",
-  "conversation", "action.rejected", "town.notice", "town.book", "town.mayor", "town.works", "town.verdict", "town.gathering", "town.fire", "boat.cargo", "cart.leg", "agent.do", "agent.became", "town.recipe", "town.named", "town.rule", "town.saying", "agent.search", "town.expose", "law.passed", "law.failed", "agent.plan", "agent.build", "town.built", "agent.unpaid", "agent.hire", "agent.lend", "agent.lodge", "agent.debt", "agent.weak", "agent.died", "town.born", "town.of_age", "agent.inherit", "boat.news",
+  "conversation", "action.rejected", "town.notice", "town.book", "town.mayor", "town.works", "town.verdict", "town.gathering", "town.fire", "boat.cargo", "cart.leg", "agent.do", "agent.do_attempt", "agent.do_outcome", "agent.became", "town.recipe", "town.named", "town.rule", "town.saying", "agent.search", "town.expose", "law.passed", "law.failed", "agent.plan", "agent.build", "town.built", "agent.unpaid", "agent.hire", "agent.lend", "agent.lodge", "agent.debt", "agent.weak", "agent.died", "town.born", "town.of_age", "agent.inherit", "boat.news",
 ]);
 export type EventKind = z.infer<typeof EventKind>;
 
@@ -339,8 +339,8 @@ export const Paper = z.object({
   edition: z.number().int(),
   date: z.string(),
   weather: z.string(),
-  lead: z.object({ headline: z.string().max(120), deck: z.string().max(240), body: z.string().max(2600) }),
-  briefs: z.array(z.object({ headline: z.string().max(120), body: z.string().max(1200) })).max(4),
+  lead: z.object({ headline: z.string().max(120), deck: z.string().max(240), body: z.string().max(2600), sources: z.array(z.number().int()).optional() }),
+  briefs: z.array(z.object({ headline: z.string().max(120), body: z.string().max(1200), sources: z.array(z.number().int()).optional() })).max(4),
   notices: z.array(z.string().max(240)).max(6),
   /** The standing columns: the shelf and its prices, the boat and who came and went, and what tomorrow holds. */
   market: z.string().max(420).optional(),
@@ -351,6 +351,10 @@ export const Paper = z.object({
   seal: z.object({ day: z.number().int(), hash: z.string(), prev: z.string(), events: z.number().int() }).optional(),
 });
 export type Paper = z.infer<typeof Paper>;
+
+/** The editor chooses public stories; the engine supplies every published word of fact. */
+export const PaperOutline = z.object({ lead: z.number().int(), briefs: z.array(z.number().int()).max(4) });
+export type PaperOutline = z.infer<typeof PaperOutline>;
 
 /** The written life: what the town says of someone once they have left it, for good or on the boat. */
 export const LifeText = z.object({ title: z.string().max(90), text: z.string().max(4400), epitaph: z.string().max(140) });

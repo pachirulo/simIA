@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { ActionProposal, Dialogue, Paper, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
+import { ActionProposal, Dialogue, Paper, PaperOutline, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
+import { composePaper } from "@unwatched/engine";
 import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, Tier, PlanContext, DigestContext, ChildContext, LifeContext, JudgeContext } from "@unwatched/engine";
 import { MockBrain } from "./mock.ts";
 import { WORLD, personaBlock, decidePrompt, conversePrompt, reflectPrompt, paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, planPrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
@@ -119,13 +120,13 @@ export class AnthropicBrain implements Brain {
   async writePaper(ctx: PaperContext): Promise<Paper> {
     try {
       const res = await this.client.messages.parse({
-        model: this.reflectModel, max_tokens: 3000,
+        model: this.reflectModel, max_tokens: 300,
         system: paperSystem,
         messages: [{ role: "user", content: paperPrompt(ctx) }],
-        output_config: { format: zodOutputFormat(Paper) },
+        output_config: { format: zodOutputFormat(PaperOutline) },
       }, this.opts(this.reflectModel));
       if (res.stop_reason === "refusal" || !res.parsed_output) return this.fallback.writePaper(ctx);
-      return res.parsed_output;
+      return composePaper(ctx, res.parsed_output);
     } catch (err) { return this.handle(err, () => this.fallback.writePaper(ctx)); }
   }
   async judge(ctx: JudgeContext): Promise<Judgement> {

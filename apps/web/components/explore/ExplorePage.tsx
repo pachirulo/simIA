@@ -13,15 +13,17 @@ export function ExplorePage({
   title,
   description,
   art,
+  compact = false,
 }: {
   children: React.ReactNode;
   eyebrow: string;
   title: string;
   description: string;
   art?: string;
+  compact?: boolean;
 }) {
   return (
-    <main className={s.page}>
+    <main className={`${s.page} ${compact ? s.compact : ""}`}>
       <a href="#explore-content" className={s.skip}>
         Skip to content
       </a>

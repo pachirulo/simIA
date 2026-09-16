@@ -1,6 +1,6 @@
 import type { LifeText, Judgement, ActionProposal, DayPlan, DigestText, Dialogue, Paper, Perception, Persona, Reflection } from "@unwatched/protocol";
 import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, Tier, PlanContext, DigestContext, ChildContext, LifeContext, JudgeContext } from "@unwatched/engine";
-import { Rng } from "@unwatched/engine";
+import { Rng, composePaper } from "@unwatched/engine";
 
 /**
  * A mind that costs nothing. Deterministic given the seed, opinionated enough to make a town.
@@ -163,20 +163,7 @@ export class MockBrain implements Brain {
   }
 
   async writePaper(ctx: PaperContext): Promise<Paper> {
-    // Talk is filler; the lead is the day's most important thing that was not a chat, if there was one.
-    const isTalk = (t: string) => / talked at /.test(t);
-    const evs = [...ctx.events.filter((e) => !isTalk(e.text)), ...ctx.events.filter((e) => isTalk(e.text))];
-    const lead = evs[0];
-    const headline = (t: string) => {
-      if (isTalk(t)) { const m = /^(.+?) and (.+?) talked at (.+?)\./.exec(t); return m ? `${m[1]} and ${m[2]} seen talking at ${m[3]}` : t.slice(0, 88); }
-      return t.replace(/[“”"]/g, "").split(/[.!?]/)[0]!.slice(0, 88);
-    };
-    return {
-      edition: ctx.edition, date: ctx.date, weather: ctx.weather,
-      lead: lead ? { headline: headline(lead.text), deck: `Reported from ${lead.actors.join(" and ") || "the harbor"}.`, body: lead.text.slice(0, 1200) } : { headline: "A quiet day on the island", deck: "Nothing changed, and that is allowed.", body: `The boat came and went. ${ctx.population} people live here.` },
-      briefs: evs.slice(1, 5).map((e) => ({ headline: headline(e.text), body: e.text.slice(0, 400) })),
-      notices: [`Population ${ctx.population}. ${ctx.arrivals} arrived, ${ctx.departures} left.`, ...ctx.laws.slice(0, 2).map((l) => `Proposed at the council: ${l}`), `Weather: ${ctx.weather}.`].slice(0, 6),
-    };
+    return composePaper(ctx);
   }
   async judge(ctx: JudgeContext): Promise<Judgement> {
     // the plain referee: it happened, it cost nothing, it made nothing; a meal-shaped deed eases hunger, a rest-shaped one rest, company eases company
