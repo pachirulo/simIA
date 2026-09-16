@@ -8,6 +8,8 @@ All notable changes to Unwatched are recorded here. The format is based on [Keep
 
 ### Changed
 
+- The Gazette prints a sourced newspaper front page with one lead, distinct briefs and standing columns; its editor ranks public stories without writing new factual claims.
+
 ### Fixed
 
 ## [0.14.1] - 2026-09-14
