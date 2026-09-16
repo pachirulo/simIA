@@ -1,4 +1,5 @@
 "use client";
+import { Inventory } from "@/components/citizen/Inventory";
 import { Icon as ArrowIcon } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
@@ -44,6 +45,7 @@ export default function Town() {
     ready: false,
     error: false,
   });
+  const [spotlight, setSpotlight] = useState<{ id: number; actors: string[]; place: string | null; at: number } | null>(null);
   const [possessed, setPossessed] = useState(false);
   const [say, setSay] = useState("");
   const [busy, setBusy] = useState(false);
@@ -66,7 +68,7 @@ export default function Town() {
   }, []);
   useEffect(() => {
     let alive = true;
-    setSelFull(null);
+    setSelFull(current => current?.id === sel?.id ? current : null);
     setDetailError(false);
     if (sel)
       void api<OwnerAgent | PublicAgent>(`/api/agents/${sel.id}`)
@@ -79,7 +81,7 @@ export default function Town() {
     return () => {
       alive = false;
     };
-  }, [sel?.id]);
+  }, [sel?.id, snapshot.feed.find(e => e.actors.includes(sel?.id ?? ""))?.id]);
   useEffect(() => {
     if (sel) heading.current?.focus();
   }, [sel?.id]);
@@ -145,6 +147,8 @@ export default function Town() {
             focusId={tracking ?? (follow ? agent?.id ?? null : null)}
             onViewChange={changeView}
             onSelect={setSel}
+            selectedId={sel?.id ?? null}
+            spotlight={spotlight}
             view={view}
             effects={effects}
             observer
@@ -193,16 +197,26 @@ export default function Town() {
                 <div aria-label="Recent island events">
                   {snapshot.feed.length ? (
                     snapshot.feed.slice(0, 12).map((e) => (
-                      <article
+                      <button
+                        type="button"
                         key={e.id}
-                        className={s.event}
+                        className={`${s.event} ${s.eventBtn}`}
                         data-important={e.importance >= 0.45}
+                        onClick={() =>
+                          setSpotlight({
+                            id: e.id,
+                            actors: e.actors,
+                            place: e.place ?? null,
+                            at: Date.now(),
+                          })
+                        }
+                        title="Show this on the island"
                       >
                         <time>
                           Day {e.day} · {hhmm(e.t)}
                         </time>
                         <p>{e.text}</p>
-                      </article>
+                      </button>
                     ))
                   ) : (
                     <p className={s.empty}>
@@ -307,6 +321,7 @@ export default function Town() {
                       </p>
                     </section>
                   )}
+                  {selFull && "belongings" in selFull && selFull.belongings && <Inventory data={selFull.belongings}/>}
                   <div className={s.detailActions}>
                     <Button kind="secondary" onClick={()=>{setTracking(tracking === sel.id ? null : sel.id);setFollow(false);changeView("street");}}>{tracking === sel.id ? "Stop following" : `Follow ${sel.name.split(" ")[0]}`}</Button>
                     {agent && !possessed && (
