@@ -24,7 +24,9 @@ describe("the island's own year", () => {
     town.monthOverride = 7; town.dayOfMonthOverride = 24; const feastDay = town.day + 1; await town.run(feastDay);
     for (const a of town.agents.values()) a.needs.hunger = 0.9;
     while (town.hour < 14) await town.tick();
-    expect(town.occasion).toMatch(/island's day/);
+    const feast = town.pack.feasts.find(f => f.month === 7 && f.day === 24)!;
+    expect(feast).toBeDefined();
+    expect(town.occasion).toContain(feast.name);
     const held = town.events.find((e) => e.kind === "town.gathering" && (e.payload as { kind: string }).kind === "feast"); expect(held).toBeDefined();
     expect((held!.payload as { crowd: string[] }).crowd.length).toBeGreaterThan(4);
     const worked = town.events.filter((e) => e.kind === "agent.work" && e.day === feastDay && e.t % 1440 >= 12 * 60 + 60); expect(worked.length).toBe(0);

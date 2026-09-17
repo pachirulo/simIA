@@ -42,7 +42,7 @@ describe("the mind sees the town, the plan, and itself", () => {
     // midnight: the reflection is shown the plan with what came of it, the lists it keeps, and whether the day was quiet
     await town.run(3);
     const ref = reflected.find((r) => r.agent.id === a.id && r.day === 2)!; expect(ref).toBeDefined();
-    expect(ref.plan?.goals).toEqual(["bread at the market by nine"]); expect(ref.plan?.steps.map((s) => [s.place, s.done, s.missed])).toEqual([["the mill", false, true], ["the market square", true, false]]);
+    expect(ref.plan?.goals).toEqual(["bread at the market by nine"]); expect(ref.plan?.steps.map((s) => [s.place, s.done, s.missed])).toEqual([[town.places.get("mill")!.name, false, true], [town.places.get("market")!.name, true, false]]);
     expect(Array.isArray(ref.watch)).toBe(true); expect(Array.isArray(ref.projects)).toBe(true); expect(Array.isArray(ref.beliefs)).toBe(true); expect(typeof ref.quiet).toBe("boolean");
     // the digest reads the gap: the plan's steps and whose trust moved go to the writer
     const ctx = town.digestContext(a.id, 0)!; expect(Array.isArray(ctx.trust)).toBe(true); expect(Array.isArray(ctx.projects)).toBe(true);

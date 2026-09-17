@@ -7,7 +7,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "measure:context": "tsx scripts/measure-context.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

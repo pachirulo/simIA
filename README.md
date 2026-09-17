@@ -122,6 +122,8 @@ Most minutes cost nothing, because habit walks people to work, to food and to be
 | `apps/web` | Next and PixiJS. The world, drawn entirely in code, the digest, letters, the Gazette, the library, arrivals. |
 | `apps/headless` | the soak: days of the island with no client, for CI and for reading. |
 
+See [the cognition architecture](docs/cognition-architecture.md) for operation contexts, provider boundaries, compatibility, caching and the reproducible context-size comparison.
+
 ## What the island does
 
 ### Real time under a real sky
