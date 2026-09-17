@@ -46,6 +46,30 @@ pnpm soak -- --days 10 --agents 20 --brain mock --seed 7 --tick 1
 ```
 
 Then read `apps/headless/out/gazette-day*.md`, one newspaper per day. Somebody usually builds a house by day eight.
+By default, the first three citizens share the owner ID `you`. Use `--owned-agents 0` for an island with no owners, or `--owners ana,luis,mara --owned-agents 3` to give the first three citizens different owners. If `--owned-agents` is larger than the number of names, ownership cycles through them. `--owner ana --owned-agents 4` keeps one owner for four citizens.
+
+The initial assignment and the surviving citizens' owners are recorded in `summary.json`.
+
+### NPCs and live agents in the same soak
+
+For a mixed town, use `--npc-count` together with `--agent-count`. NPCs are seeded first from the persona list and default to the deterministic `mock` mind; agents follow them and use `--agent-brain` (or the usual `--brain` value). In this mode ownership applies only to the agent group, so this runs ten inexpensive NPCs and five OpenRouter agents owned by `vos`:
+
+```bash
+pnpm soak -- \\
+  --days 7 \\
+  --npc-count 10 \\
+  --agent-count 5 \\
+  --npc-brain mock \\
+  --agent-brain openrouter \\
+  --owned-agents 5 \\
+  --owner vos \\
+  --seed 27031981 \\
+  --tick 1 \\
+  --out apps/headless/out/ai-5agents-10npcs-7days
+```
+
+`summary.json` records each initial citizen's `role` (`npc` or `agent`), mind, and owner. Keep using `--agents` when every citizen should share one mind; it cannot be combined with the mixed-population flags.
+Relative `--out` paths are resolved from the repository root. `soak` prints the absolute output path when it starts; `events.jsonl` and `calls.jsonl` grow during the run, while `summary.json` is written after it finishes.
 
 ## The first morning
 

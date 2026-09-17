@@ -293,6 +293,14 @@ export const TownEvent = z.object({
   place: PlaceId.optional(),
   text: z.string(),
   importance: z.number().min(0).max(1),
+  /** The model that produced the decision behind this event. Absent for events produced only by the simulation. */
+  model: z.string().optional(),
+  /** The configured role of that model call, independent of the provider or model name. */
+  modelTier: z.enum(["ROUTINE", "STAKE", "REFLECT"]).optional(),
+  /** Links this event to the OpenRouter responses in calls.jsonl. */
+  modelCallId: z.number().int().optional(),
+  /** Present only when the requested hosted model failed and another model supplied the result. */
+  requestedModel: z.string().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
 });
 export type TownEvent = z.infer<typeof TownEvent>;
@@ -314,7 +322,7 @@ export const Reflection = z.object({
   /** What you have come to believe about the world and the people in it, with how sure you are. A belief repeated is strengthened; one unmentioned fades. */
   beliefs: z.array(z.object({ about: z.string().max(60), belief: z.string().max(200), confidence: z.number().min(0).max(1) })).max(4).optional(),
   /** A phrase of yours, if you have one: something you find yourself saying. When two people say the same, the island keeps it. */
-  saying: z.string().max(80).optional(),
+  saying: z.string().max(80).nullable().optional(),
 });
 export type Reflection = z.infer<typeof Reflection>;
 

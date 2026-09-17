@@ -253,6 +253,18 @@ export interface PaperContext {
   writings: string[];
 }
 
+/** Provider provenance attached to a structured brain answer without changing its JSON shape. */
+export interface BrainTrace { model: string; modelTier?: "ROUTINE" | "STAKE" | "REFLECT"; modelCallId?: number; requestedModel?: string }
+const BRAIN_TRACE = Symbol.for("@unwatched/brain-trace");
+export function tagBrainResult<T>(value: T, trace: BrainTrace): T {
+  if (value && typeof value === "object") Object.defineProperty(value, BRAIN_TRACE, { value: trace, enumerable: false, configurable: true });
+  return value;
+}
+export function brainTrace(value: unknown): BrainTrace | null {
+  if (!value || typeof value !== "object") return null;
+  return ((value as Record<PropertyKey, unknown>)[BRAIN_TRACE] as BrainTrace | undefined) ?? null;
+}
+
 /** What the engine needs from any mind. Hosted, own-key, and own-brain all implement this. */
 export interface Brain {
   readonly name: string;
