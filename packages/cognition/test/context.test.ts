@@ -12,6 +12,19 @@ import { actionProposalSchema } from "../src/schema/action.ts";
 import { contexts } from "./fixtures.ts";
 
 describe("operation contexts", () => {
+  it("does not activate unrelated mechanics from global options or empty family state", () => {
+    const { a, perception } = contexts();
+    const p = { ...perception, nearby: [], place: { ...perception.place, kind: "harbor" },
+      self: { ...perception.self, family: { partner: null, children: [] }, knows: [], debts: [] },
+      options: ["move", "wait", "call", "propose", "vote", "write", "leave"] satisfies Perception["options"] };
+    const text = buildDecideContext(p, a).user;
+    for (const rule of [WORLD_RULES.family, WORLD_RULES.council, WORLD_RULES.shaping, WORLD_RULES.households, WORLD_RULES.secrets]) expect(text).not.toContain(rule);
+    expect(text).toContain("Call your current place"); expect(text).toContain("Leave by boat");
+    const civic = buildDecideContext({ ...p, place: { ...p.place, kind: "civic" } }, a);
+    expect(civic.user).toContain(WORLD_RULES.council);
+    expect(buildDecideContext({ ...p, self: { ...p.self, family: { partner: "Tomás", children: [] } } }, a).user).toContain(WORLD_RULES.family);
+    expect(buildDecideContext({ ...p, options: [...p.options, "search"] }, a).user).toContain(WORLD_RULES.secrets);
+  });
   it("preserves the legacy WORLD composition byte for byte for the direct Anthropic adapter and measurement baseline", () => {
     expect(createHash("sha256").update(WORLD).digest("hex")).toBe("b6288e82d27300006d61e5135fbd85fde1086a91fa2f56f4a8d45931cd775ad7");
   });

@@ -60,7 +60,8 @@ describe("OpenRouter operation contracts", () => {
       expect(body.response_format.json_schema.schema).toEqual(cleanSchema(z.toJSONSchema(schemas[i]!)));
       const blocks = body.messages[0]!.content as Block[];
       expect(blocks[0]!.text).toContain(c.primer);
-      expect(blocks[0]!.text).toContain(JSON.stringify(body.response_format.json_schema.schema));
+      expect(blocks[0]!.text).not.toContain(JSON.stringify(body.response_format.json_schema.schema));
+      expect(blocks[0]!.text).toContain("supplied response schema");
       expect(blocks[0]!.cache_control).toEqual({ type: "ephemeral" });
     });
     expect(usage.every(u => u.agentId === c.a.id)).toBe(true);

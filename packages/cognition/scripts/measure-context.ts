@@ -13,11 +13,12 @@ import { contexts } from "../test/fixtures.ts";
 
 /** No network or tokenizer dependency: count the exact text sent, including the JSON
  * schema in system. chars/4 is only an estimate, never provider-billed token usage. */
-function size(kind: CallKind, context: CognitiveContext, schema: z.ZodType, primer: string) {
-  const messages = buildMessages(withPrimer(kind, context.system, primer), context.user, cleanSchema(z.toJSONSchema(schema)));
+function size(kind: CallKind, context: CognitiveContext, schema: z.ZodType, primer: string, legacy = false) {
+  const schemaText = JSON.stringify(cleanSchema(z.toJSONSchema(schema)));
+  const messages = buildMessages(withPrimer(kind, context.system, primer), context.user);
   const blocks = messages[0]!.content as { text: string }[];
-  const system = blocks.reduce((sum, block) => sum + block.text.length, 0);
-  return { system, user: context.user.length, total: system + context.user.length };
+  const system = blocks.reduce((sum, block) => sum + block.text.length, 0) + (legacy ? schemaText.length : 0);
+  return { system, user: context.user.length, total: system + context.user.length + schemaText.length };
 }
 
 const c = contexts();
@@ -31,11 +32,11 @@ const rows: { name: string; kind: CallKind; before: CognitiveContext; after: Cog
   { name: "reflect", kind: "reflection", before: { system: own, user: reflectPrompt(c.reflect) }, after: buildReflectContext(c.reflect), schema: Reflection },
 ];
 console.log("Offline context comparison. Same engine fixture, persona, dynamic primer and protocol schema on both sides.");
-console.log("Baseline: legacy WORLD + unchanged task renderers. Counts exclude response_format's duplicate schema and wire framing (unchanged).");
+console.log("Baseline: legacy WORLD and duplicate schema. Counts include response_format schema on BOTH sides; chars/4 is an estimate, not billed tokens.");
 console.log("| Operation | System chars before → after | User chars before → after | Total chars before → after | Reduction | Approx. tokens before → after (chars/4) |");
 console.log("| --- | ---: | ---: | ---: | ---: | ---: |");
 for (const row of rows) {
-  const before = size(row.kind, row.before, row.schema, c.primer);
+  const before = size(row.kind, row.before, row.schema, c.primer, true);
   const after = size(row.kind, row.after, row.schema, c.primer);
   console.log(`| ${row.name} | ${before.system} → ${after.system} | ${before.user} → ${after.user} | ${before.total} → ${after.total} | ${((1 - after.total / before.total) * 100).toFixed(1)}% | ${Math.ceil(before.total / 4)} → ${Math.ceil(after.total / 4)} |`);
 }
