@@ -10,6 +10,7 @@ export { embed, cosine } from "./embed.ts";
 export { ISLAND, BUILDS, WORKS, lookHash, buildKind } from "./world.ts";
 export type { WorldPack, PlaceSpec, JobSpec, ProduceSpec, SupplySpec, ExportSpec, FeastSpec } from "./world.ts";
 export { sha256, canonicalEvent } from "./hash.ts";
+export { publicPaperEvents, paperStories, composePaper } from "./paper.ts";
 
 export { desiresForMind } from "./desires.ts";
 

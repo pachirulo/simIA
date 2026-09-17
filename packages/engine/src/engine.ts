@@ -12,6 +12,7 @@ import type { AgentState, Deal, Brain, Budget, EventSink, Job, Place, Tier, Memo
 import { makeJobs, makePlaces, FOOD_ITEMS, PERISHABLE, MINUTES_PER_DAY, SEASONS, BUILDS, GARDEN, WORKS, buildKind, lookHash, siteName, stockShelf, ISLAND, type WorldPack } from "./world.ts";
 import { retrieve, compress, age, drift, memoryForMind } from "./memory.ts";
 import { sha256, canonicalEvent } from "./hash.ts";
+import { composePaper, publicPaperEvents } from "./paper.ts";
 import { validate } from "./validator.ts";
 import { habit } from "./habit.ts";
 import { routineReady, salience, wantsConversation, dueThought } from "./salience.ts";
@@ -856,7 +857,7 @@ export class Town {
       case "do": {
         const b = action.with ? (this.agents.get(action.with) ?? [...this.agents.values()].find((x) => x.persona.name.toLowerCase() === action.with!.toLowerCase())) ?? null : null;
         a.doToday++;
-        this.emit("agent.do", [a.id, ...(b ? [b.id] : [])], here.id, `${name}${b ? `, with ${b.persona.name},` : ""}: ${action.what}`, 0.4, { what: action.what });
+        this.emit("agent.do_attempt", [a.id, ...(b ? [b.id] : [])], here.id, `${name}${b ? `, with ${b.persona.name},` : ""}: ${action.what}`, 0.4, { what: action.what });
         this.deeds.push({ a, what: action.what, with: b, place: here });
         break;
       }
@@ -1506,7 +1507,7 @@ export class Town {
       const ctx: JudgeContext = { agent: a, what, withName: b?.persona.name ?? null, place: place.name, placeKind: place.kind, hour: this.hour, weather: this.weather, nearby: this.nearby(a).map((x) => x.persona.name), inventory: [...a.inventory], coins: a.coins, stock: Object.entries(place.stock).filter(([, v]) => v > 0).map(([k, v]) => `${v} ${k}`) };
       let j; try { j = await this.brain.judge(ctx); } catch (err) { this.log(`judge failed for ${a.persona.name}: ${(err as Error).message}`); return; }
       const name = a.persona.name;
-      if (!j.plausible) { this.remember(a, `I tried to ${what}. ${j.happened}`, 0.4); this.emit("agent.do", [a.id], place.id, `${name} tried to ${what}: ${j.happened}`, 0.3, { what, happened: j.happened, plausible: false }); return; }
+      if (!j.plausible) { this.remember(a, `I tried to ${what}. ${j.happened}`, 0.4); this.emit("agent.do_outcome", [a.id], place.id, `${name} tried to ${what}: ${j.happened}`, 0.3, { what, happened: j.happened, plausible: false }); return; }
       const spent = Math.min(a.coins, j.coins_spent); if (spent > 0) { a.coins -= spent; const owner = place.owner ? this.agents.get(place.owner) : null; if (owner && owner.id !== a.id) owner.coins += spent; else place.treasury += spent; }
       if (j.item_lost && a.inventory.includes(j.item_lost)) a.inventory.splice(a.inventory.indexOf(j.item_lost), 1);
       const gained = j.item_gained && a.doToday <= 3 ? j.item_gained.toLowerCase().replace(/[^a-z ]/g, "").trim() : null; if (gained && a.inventory.length < capacity(a) && !recipe(gained) && !/coin|money|gold|silver/.test(gained)) a.inventory.push(gained);
@@ -1514,7 +1515,7 @@ export class Town {
       for (const t of j.trust) { const who = this.resolveRef(t.who, this.nearby(a)); if (this.agents.has(who) && who !== a.id) { this.nudge(this.agents.get(who)!, a.id, t.delta, t.delta / 2); } }
       this.remember(a, `I ${what}. ${j.happened}`, 0.55);
       for (const w of this.nearby(a)) this.remember(w, `${name} ${what}. ${j.happened}`, 0.4);
-      this.emit("agent.do", [a.id, ...(b ? [b.id] : [])], place.id, `${name}: ${what}. ${j.happened}${spent ? ` (${spent} coins)` : ""}${gained ? ` (now has ${gained})` : ""}`, 0.45, { what, happened: j.happened, spent, gained });
+      this.emit("agent.do_outcome", [a.id, ...(b ? [b.id] : [])], place.id, `${name}: ${what}. ${j.happened}${spent ? ` (${spent} coins)` : ""}${gained ? ` (now has ${gained})` : ""}`, 0.45, { what, happened: j.happened, spent, gained });
     }));
   }
   /** Something this person chose to watch, here and now: the place, someone present, or a word in what was just said. */
@@ -1670,14 +1671,10 @@ export class Town {
   private async printPaper(): Promise<void> {
     if (this.brain.name === "none" || this.paused) return;
     const dayStart = (this.day - 1) * MINUTES_PER_DAY;
-    // the paper prints what was done or said where others could see it: never a private thought, a plan, a letter home, or what one person privately thinks of another
-    const PRIVATE = new Set(["agent.reflect", "agent.letter", "town.book", "relation.change", "agent.plan", "agent.wake", "agent.sleep", "action.rejected", "agent.self"]);
-    const raw = this.events.filter((e) => e.t >= dayStart && e.importance >= 0.3 && !PRIVATE.has(e.kind))
-      .sort((x, y) => y.importance - x.importance).slice(0, 16);
-    const evs = raw.map((e) => ({ text: e.text, importance: e.importance, actors: e.actors.map((id) => this.agents.get(id)?.persona.name ?? id) }));
+    const evs = publicPaperEvents(this.events, this.day, (id) => this.agents.get(id)?.persona.name ?? id, (id) => this.places.get(id)?.name ?? id, (id) => this.places.get(id)?.kind !== "home");
     const last = this.papers[this.papers.length - 1] ?? null;
     const market = this.places.get("market"); const shelf = market ? market.sells.map((s) => ({ item: s.item, price: this.price(market, s.item), stock: market.stock[s.item] ?? 0 })) : [];
-    const harbor = this.events.filter((e) => e.t >= dayStart && (e.kind === "boat.dock" || e.kind === "boat.cargo" || e.kind === "boat.news")).map((e) => e.text);
+    const harbor = this.events.filter((e) => e.t >= dayStart && e.day === this.day && (e.kind === "boat.cargo" || e.kind === "boat.news")).map((e) => e.text);
     const came = this.events.filter((e) => e.t >= dayStart && e.kind === "agent.arrive").map((e) => this.agents.get(e.actors[0] ?? "")?.persona.name ?? "").filter(Boolean);
     const went = this.events.filter((e) => e.t >= dayStart && e.kind === "agent.leave").map((e) => e.text);
     const tomorrowDay = this.day + 1; const feast = this.pack.feasts.find((f) => f.month === this.monthOf(tomorrowDay) && f.day === this.dayOfMonthOf(tomorrowDay));
@@ -1685,12 +1682,19 @@ export class Town {
     const tomorrow = [`${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][(tomorrowDay - 1) % 7]}${(tomorrowDay - 1) % 7 === 0 ? ", no shifts" : (tomorrowDay - 1) % 7 === 6 ? ", market day" : ""}`, ...(this.dayOfMonthOf(tomorrowDay) === 1 ? ["council day"] : []), ...(feast ? [`${feast.name} at ${this.places.get(feast.place)?.name ?? feast.place}`] : []), ...gatherings].join("; ");
     const writings = this.events.filter((e) => e.t >= dayStart && e.kind === "town.expose").map((e) => e.text);
     try {
-      const paper = await this.brain.writePaper({ edition: this.day, date: `Day ${this.day}`, weather: this.weather, events: evs, laws: this.laws.filter((l) => l.open).map((l) => l.text), population: this.agents.size, arrivals: this.arrivalsToday, departures: this.departuresToday,
-        yesterday: last ? { headline: last.lead.headline, deck: last.lead.deck, briefs: last.briefs.map((b) => b.headline) } : null, market: shelf, harbor, came, went, tomorrow, mayor: this.mayor ? (this.agents.get(this.mayor)?.persona.name ?? null) : null, writings });
+      const ctx = { edition: this.day, date: `Day ${this.day}`, weather: this.weather, events: evs, laws: this.laws.filter((l) => l.open).map((l) => l.text), population: this.agents.size, arrivals: this.arrivalsToday, departures: this.departuresToday,
+        yesterday: last ? { headline: last.lead.headline, deck: last.lead.deck, briefs: last.briefs.map((b) => b.headline) } : null, market: shelf, harbor, came, went, tomorrow, mayor: this.mayor ? (this.agents.get(this.mayor)?.persona.name ?? null) : null, writings,
+        jobsOpen: [...this.jobs.values()].filter((j) => j.holders.length < j.slots).map((j) => `${j.title} at ${this.places.get(j.place)?.name ?? j.place}, ${j.wage} coins per shift`) };
+      let draft: Paper | null = null;
+      try { draft = await this.brain.writePaper(ctx); }
+      catch (err) { this.log(`paper editor failed; using the public record: ${(err as Error).message}`); }
+      // Only story IDs survive the model call. All published factual prose is rendered from the public record.
+      const paper = composePaper(ctx, draft ? { lead: draft.lead.sources?.[0] ?? -1, briefs: draft.briefs.map((b) => b.sources?.[0] ?? -1) } : null);
       // the front-page picture: the most important moment that happened somewhere, as the record has it
-      const lead = raw.find((e) => e.place && this.places.has(e.place) && !/ talked at /.test(e.text)) ?? raw.find((e) => e.place && this.places.has(e.place));
-      const at = lead ? this.places.get(lead.place!)! : this.places.get("harbor");
-      if (at) paper.scene = { place: at.id, placeName: at.name, sprite: at.sprite, actors: (lead?.actors ?? []).slice(0, 4).map((id) => this.agents.get(id)?.persona.name ?? id), hour: lead ? Math.floor((lead.t % MINUTES_PER_DAY) / 60) : 8, weather: this.weather, caption: (lead?.text ?? `${this.weather[0]!.toUpperCase()}${this.weather.slice(1)} over the harbor.`).slice(0, 200) };
+      const lead = this.events.find((e) => e.id === paper.lead.sources?.[0]);
+      const pictured = lead?.place && this.places.has(lead.place) ? lead : null;
+      const at = pictured ? this.places.get(pictured.place!)! : this.places.get("harbor");
+      if (at) paper.scene = { place: at.id, placeName: at.name, sprite: at.sprite, actors: (pictured?.actors ?? []).slice(0, 4).map((id) => this.agents.get(id)?.persona.name ?? id), hour: pictured ? Math.floor((pictured.t % MINUTES_PER_DAY) / 60) : 8, weather: this.weather, caption: (pictured?.text ?? `${this.weather[0]!.toUpperCase()}${this.weather.slice(1)} over the harbor.`).slice(0, 200) };
       this.papers.push(paper);
     } catch (err) { this.log(`paper failed: ${(err as Error).message}`); }
   }

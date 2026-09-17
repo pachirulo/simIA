@@ -252,12 +252,12 @@ export interface LifeContext {
 }
 export interface PaperContext {
   edition: number; date: string; weather: string;
-  events: { text: string; importance: number; actors: string[] }[];
+  events: { id: number; t: number; kind: TownEvent["kind"]; text: string; importance: number; actors: string[]; place: string | null }[];
   laws: string[]; population: number; arrivals: number; departures: number;
   /** yesterday's front page, so a story that moved is followed and one that did not is not repeated */
   yesterday: { headline: string; deck: string; briefs: string[] } | null;
   /** the shelf at the market and what things cost; the boat, the cargo, who came and went; what tomorrow holds */
-  market: { item: string; price: number | null; stock: number }[]; harbor: string[]; came: string[]; went: string[]; tomorrow: string; mayor: string | null;
+  market: { item: string; price: number | null; stock: number }[]; harbor: string[]; came: string[]; went: string[]; tomorrow: string; mayor: string | null; jobsOpen: string[];
   /** what citizens wrote for others to read today: exposés, notices of their own */
   writings: string[];
 }

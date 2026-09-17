@@ -475,8 +475,8 @@ app.get("/api/events/:id/voice", async (c) => {
   try { const buf = await voices.read(`${TOWN_ID}-${id}`, a.persona, text); return new Response(new Uint8Array(buf), { headers: { "Content-Type": "audio/wav", "Cache-Control": "private, max-age=86400", "X-Voice": voiceOf(a.persona.name) } }); }
   catch (err) { log(`voice for letter ${id}: ${(err as Error).message}`); return c.json({ error: (err as Error).message }, 502); }
 });
-/** What never leaves a person's head, so it is never a moment to share: the same set the paper keeps out. */
-const PRIVATE_KINDS = new Set(["agent.reflect", "agent.letter", "town.book", "relation.change", "agent.plan", "agent.wake", "agent.sleep", "action.rejected", "agent.self"]);
+/** Personal events hidden from street moments. The Gazette applies a stricter allowlist. */
+const PRIVATE_KINDS = new Set(["agent.reflect", "agent.letter", "town.book", "relation.change", "agent.plan", "agent.wake", "agent.sleep", "action.rejected", "agent.self", "agent.became"]);
 app.get("/api/moments/:id", (c) => {
   const id = Number(c.req.param("id")); const e = town.events.find((x) => x.id === id);
   if (!e || PRIVATE_KINDS.has(e.kind)) return c.json({ error: "that moment is not in the street's memory anymore" }, 404);
@@ -701,7 +701,7 @@ app.get("/api/library/:id", async (c) => { const row = store ? await store.life(
 app.get("/api/papers/latest", (c) => { const p = town.papers[town.papers.length - 1]; return p ? c.json(p) : c.json({ error: "the first edition prints at midnight" }, 404); });
 app.get("/api/events", (c) => {
   const since = Number(c.req.query("since") ?? town.t - 120); const place = c.req.query("place"); const min = Number(c.req.query("min") ?? 0);
-  return c.json(town.events.filter((e) => e.t >= since && (!place || e.place === place) && e.importance >= min).slice(-500).map(publicEvent));
+  return c.json(town.events.filter((e) => e.t >= since && (!place || e.place === place) && e.importance >= min && !PRIVATE_KINDS.has(e.kind)).slice(-500).map(publicEvent));
 });
 app.post("/api/boarding/external", async(c)=>{
   const owner=await ownerOf(c.req.raw);if(!owner)return c.json({error:"Sign in first."},401);

@@ -33,8 +33,9 @@ describe("free minds", () => {
     const mill = a.beliefs.find((b) => b.about === "the mill")!, vesna = a.beliefs.find((b) => b.about === "Vesna")!; expect(mill.confidence).toBeGreaterThan(0.6); expect(vesna.confidence).toBeLessThan(0.4);
     // the watched place draws a thought, and the free deed comes to something
     a.location = "market"; a.asleep = false; a.lastThought = -999; while (town.hour < 10) await town.tick();
-    for (let i = 0; i < 40 && !town.events.some((e) => e.kind === "agent.do" && /whistled/.test(e.text)); i++) { a.location = "market"; a.asleep = false; await town.tick(); }
-    const did = town.events.find((e) => e.kind === "agent.do" && /whistled/.test(e.text)); expect(did).toBeDefined();
+    for (let i = 0; i < 40 && !town.events.some((e) => e.kind === "agent.do_outcome" && /whistled/.test(e.text)); i++) { a.location = "market"; a.asleep = false; await town.tick(); }
+    const did = town.events.find((e) => e.kind === "agent.do_outcome" && /whistled/.test(e.text)); expect(did).toBeDefined();
+    expect(town.events.some((e) => e.kind === "agent.do_attempt" && /whistle/.test(e.text))).toBe(true);
     expect(a.memory.some((m) => /whistle/.test(m.text))).toBe(true);
     expect(a.doToday).toBeGreaterThan(0); expect((did!.payload as { spent?: number }).spent ?? 0).toBe(0); // a whistle costs nothing; bread and a bed still do
   });

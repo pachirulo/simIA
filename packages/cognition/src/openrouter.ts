@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { ActionProposal, Dialogue, Paper, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
+import { ActionProposal, Dialogue, Paper, PaperOutline, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
+import { composePaper } from "@unwatched/engine";
 import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, Tier, PlanContext, DigestContext, ChildContext, LifeContext, JudgeContext } from "@unwatched/engine";
 import { MockBrain } from "./mock.ts";
 import { WORLD, personaBlock, decidePrompt, conversePrompt, reflectPrompt, paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, planPrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
@@ -228,8 +229,8 @@ export class OpenRouterBrain implements Brain {
   }
   async writePaper(ctx: PaperContext): Promise<Paper> {
     const { model, slot } = this.pick("paper", null);
-    const out = await this.call("paper", model, slot, { shared: paperSystem }, paperPrompt(ctx), Paper, 3000);
-    return out ?? this.stood("paper", model, await this.fallback.writePaper(ctx));
+    const out = await this.call("paper", model, slot, { shared: paperSystem }, paperPrompt(ctx), PaperOutline, 300);
+    return out ? composePaper(ctx, out) : this.stood("paper", model, await this.fallback.writePaper(ctx));
   }
   async judge(ctx: JudgeContext): Promise<Judgement> {
     const { model, slot } = this.pick("judgement", ctx.agent);
