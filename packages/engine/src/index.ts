@@ -1,6 +1,7 @@
 export { Town, asksSomething } from "./engine.ts";
 export type { TownOptions, AddAgentOptions } from "./engine.ts";
-export type { Rule, AgentState, Brain, Tier, Place, Job, Relation, Memory, ConverseContext, ReflectContext, PlanContext, PaperContext, LifeContext, JudgeContext, DigestContext, ChildContext, ActivePlan, Budget, TownSnapshot, AgentSnapshot } from "./types.ts";
+export type { Rule, AgentState, Brain, BrainTrace, Tier, Place, Job, Relation, Memory, ConverseContext, ReflectContext, PlanContext, PaperContext, LifeContext, JudgeContext, DigestContext, ChildContext, ActivePlan, Budget, TownSnapshot, AgentSnapshot } from "./types.ts";
+export { tagBrainResult, brainTrace } from "./types.ts";
 export { Rng } from "./rng.ts";
 export { validate } from "./validator.ts";
 export { habit } from "./habit.ts";

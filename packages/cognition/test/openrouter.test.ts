@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import type { AgentState, ConverseContext, DigestContext, JudgeContext, LifeContext, ReflectContext, Place } from "@unwatched/engine";
-import type { Persona } from "@unwatched/protocol";
+import type { Persona, Perception } from "@unwatched/protocol";
 import { OpenRouterBrain, chooseModel, SLOT_OF, trimProse, truncateProse, repairNote, isFromFallback, canEnrich, MockBrain } from "../src/index.ts";
 
 const persona = (name: string): Persona => ({ name, age: 33, origin: "the mainland", summary: "A restless person.", want: "somewhere better", fear: "staying", secret: "none", strangers: "curious", advice: "weighs it", traits: { warmth: 0.6, pride: 0.4, caution: 0.3, honesty: 0.7, ambition: 0.8 } });
@@ -9,7 +9,7 @@ const models = { routine: "haiku", stakes: "sonnet", reflect: "opus" };
 
 /** A fake OpenRouter: records every request body and answers from a queue. */
 function fakeFetch(answers: (unknown | { status: number })[]) {
-  const bodies: { model: string; max_tokens: number; messages: { role: string; content: unknown }[] }[] = [];
+  const bodies: { model: string; max_tokens: number; messages: { role: string; content: unknown }[]; reasoning?: { effort: string } }[] = [];
   const fetch = vi.fn(async (_url: string, init: { body: string; signal?: AbortSignal }) => {
     bodies.push(JSON.parse(init.body));
     const next = answers.shift();
@@ -60,6 +60,13 @@ describe("a quiet night", () => {
     expect(bodies[1]!.model).toBe("opus"); expect(bodies[1]!.max_tokens).toBe(2000);
     expect(bodies[0]!.messages[1]).toEqual(bodies[1]!.messages[1]);
   });
+  it("accepts a null saying as an omitted saying", async () => {
+    const { bodies } = fakeFetch([{ ...answer, saying: null }]);
+    const b = new OpenRouterBrain({ apiKey: "k", ...models });
+    const out = await b.reflect(ctx(citizen("ada"), false));
+    expect(out.saying).toBeNull();
+    expect(bodies[0]!.reasoning).toEqual({ effort: "none" });
+  });
 });
 
 describe("the cache markers", () => {
@@ -83,6 +90,14 @@ describe("the cache markers", () => {
 });
 
 describe("repairing an answer", () => {
+  it("accepts a blank optional action target as absent, without paying for a repair", async () => {
+    const { bodies } = fakeFetch([{ desire_id: "d_paint_harbor", action: { kind: "do", what: "Study the light on the water for my first painting.", with: "" }, remember: [] }]);
+    const b = new OpenRouterBrain({ apiKey: "k", ...models });
+    const p = { time: { sim: "day 1 10:00", weather: "clear" }, place: {}, self: {}, nearby: [] } as unknown as Perception;
+    const out = await b.decide(p, citizen("ada"), 1);
+    expect(out.action).toEqual({ kind: "do", what: "Study the light on the water for my first painting." });
+    expect(bodies).toHaveLength(1);
+  });
   it("trims prose at a sentence, at a word when there is none, and leaves what fits alone", () => {
     expect(trimProse("Short.", 10)).toBe("Short.");
     expect(trimProse("One sentence. Two sentence. Three sentence.", 30)).toBe("One sentence. Two sentence.");
@@ -169,6 +184,19 @@ describe("an answer that arrives broken", () => {
     expect(bodies).toHaveLength(2);
     expect(bodies[1]!.messages).toHaveLength(bodies[0]!.messages.length); // the second ask is a fresh one, not a repair on an empty answer
   });
+  it("identifies a response that spent its completion on reasoning instead of JSON", async () => {
+    const answer = { happened: "a whistle", plausible: true, coins_spent: 0, item_gained: null, item_lost: null, eases: null, trust: [] };
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: "", reasoning: "I should decide what happened." } }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(answer) } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetch);
+    const lines: string[] = [];
+    const b = new OpenRouterBrain({ apiKey: "k", ...models, log: (line) => lines.push(line) });
+    const out = await b.judge({ agent: citizen("ada"), ...judgeCtx } as JudgeContext);
+    expect(isFromFallback(out)).toBe(false);
+    expect(lines).toContain("openrouter returned reasoning but no final content; retrying the JSON request");
+    expect(JSON.parse(fetch.mock.calls[0]![1]!.body).reasoning).toEqual({ effort: "none" });
+  });
   it("does not sleep after it has already decided to fall back", async () => {
     fakeFetch([{ status: 503 }, { status: 503 }]);
     const b = new OpenRouterBrain({ apiKey: "k", ...models });
@@ -199,7 +227,7 @@ describe('provider cost attribution',()=>{
   const fetch=vi.fn().mockImplementationOnce(async()=>new Response(JSON.stringify({choices:[{message:{content:'not json'}}],usage:{prompt_tokens:100,completion_tokens:10,cost:0.001}}))).mockImplementationOnce(async()=>new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({text:'A calm day.',headline:'Calm'})}}],usage:{prompt_tokens:120,completion_tokens:20,cost:0.002,prompt_tokens_details:{cached_tokens:80}}})));
   vi.stubGlobal('fetch',fetch);const b=new OpenRouterBrain({apiKey:'test',...models});const usage:unknown[]=[];b.onUsage=u=>usage.push(u);
   await b.digest({agent:citizen('patron'),name:'Patron',day:1,daysAway:1,events:[],plan:null,letter:null,people:[],coins:0,job:null,home:null,reflection:null,intentions:[],projects:[],trust:[]} as DigestContext);
-  expect(usage).toEqual([expect.objectContaining({agentId:'patron',kind:'digest',model:'sonnet',costUsd:.001}),expect.objectContaining({agentId:'patron',costUsd:.002,cachedTokens:80})]);
+  expect(usage).toEqual([expect.objectContaining({callId:1,attempt:1,agentId:'patron',kind:'digest',modelTier:'STAKE',requestedModel:'sonnet',model:'sonnet',costUsd:.001}),expect.objectContaining({callId:1,attempt:2,agentId:'patron',costUsd:.002,cachedTokens:80})]);
  });
  it('keeps unknown provider costs unknown',async()=>{
   fakeFetch([{text:'A day.',headline:'Day'}]);const b=new OpenRouterBrain({apiKey:'test',...models});const usage=vi.fn();b.onUsage=usage;

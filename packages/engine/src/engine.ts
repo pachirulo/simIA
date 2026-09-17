@@ -7,7 +7,8 @@ import { recordBuildingMoment } from "./building-history.ts";
 import type { Action, ActionProposal, AgentId, PlaceId, Perception, TownEvent, EventKind, Persona, Paper, Reflection, DayPlan, Child, Passenger } from "@unwatched/protocol";
 import { OPTIONS_DEFAULT } from "@unwatched/protocol";
 import { Rng } from "./rng.ts";
-import type { AgentState, Deal, Brain, Budget, EventSink, Job, Place, Tier, Memory, TownSnapshot, AgentSnapshot, DigestContext, LifeContext, Gathering, Seal, JudgeContext, Rule } from "./types.ts";
+import type { AgentState, Deal, Brain, BrainTrace, Budget, EventSink, Job, Place, Tier, Memory, TownSnapshot, AgentSnapshot, DigestContext, LifeContext, Gathering, Seal, JudgeContext, Rule } from "./types.ts";
+import { brainTrace } from "./types.ts";
 import { makeJobs, makePlaces, FOOD_ITEMS, PERISHABLE, MINUTES_PER_DAY, SEASONS, BUILDS, GARDEN, WORKS, buildKind, lookHash, siteName, stockShelf, ISLAND, type WorldPack } from "./world.ts";
 import { retrieve, compress, age, drift, memoryForMind } from "./memory.ts";
 import { sha256, canonicalEvent } from "./hash.ts";
@@ -294,7 +295,7 @@ export class Town {
     const ctx: LifeContext = { name: a.persona.name, persona: a.persona, how, note, arrivedDay, day: this.day, coins: a.coins, job: a.job ? (this.jobs.get(a.job)?.title ?? null) : null, home: a.home ? (this.places.get(a.home.place)?.name ?? null) : null, events, memories, people, letters: a.letters.length, children: this.children.filter((c) => c.parents.includes(a.id)).map((c) => c.name), lettersHome, lastThought, owned, convictions: a.convictions };
     try {
       const life = await this.brain.life(ctx);
-      this.emit("town.book", [a.id], "hall", `The town wrote the book of ${a.persona.name}: “${life.title}”.`, 0.5, { title: life.title, text: life.text, epitaph: life.epitaph, how, arrivedDay, leftDay: this.day, name: a.persona.name });
+      this.emitFromBrain(life, "town.book", [a.id], "hall", `The town wrote the book of ${a.persona.name}: “${life.title}”.`, 0.5, { title: life.title, text: life.text, epitaph: life.epitaph, how, arrivedDay, leftDay: this.day, name: a.persona.name });
     } catch (err) { this.log(`the book of ${a.persona.name} was not written: ${(err as Error).message}`); }
   }
 
@@ -338,9 +339,11 @@ export class Town {
         if (a.heading === a.location) a.heading = null;
         const step = this.dueStep(a);
         // A plan step with a place pulls harder than habit's drift, for three hours from its time, unless hunger or night or a shift says otherwise.
-        const onShift = a.job && (() => { const j = this.jobs.get(a.job!); return !!j && this.hour >= j.hours[0] && this.hour < j.hours[1]; })();
+        const onShift = a.job && this.weekday !== 0 && (() => { const j = this.jobs.get(a.job!); const place = j && this.places.get(j.place); return !!j && !(place?.brokenUntil && place.brokenUntil > this.day) && this.hour >= j.hours[0] && this.hour < j.hours[1]; })();
         const pulled = step?.place && step.place !== a.location && this.places.has(step.place) && this.hour < step.hour + 3 && this.hour < 21 && a.needs.hunger < 0.6 && !onShift;
-        if ((act.kind === "wait" || pulled) && step?.place && step.place !== a.location && this.places.has(step.place)) { const next = this.path(a.location, step.place); if (next) act = { kind: "move", to: next }; }
+        // Waiting must not bypass the hunger/shift guards: otherwise a hungry citizen walks one road toward a plan,
+        // then habit sends them straight back for food, once per minute until the plan expires.
+        if (pulled && (act.kind === "wait" || act.kind === "move")) { const next = this.path(a.location, step!.place!); if (next) act = { kind: "move", to: next }; }
         const choice=choices[0], from=a.location;
         const learnedStep=choice && act.kind === "move" && act.to === this.path(from,choice.preferred) && act.to !== this.path(from,choice.baseline);
         if(this.apply(a, act, "habit") && learnedStep && choice && act.kind === "move") {
@@ -374,7 +377,7 @@ export class Town {
       let chosen = proposal.action;
       if (chosen.kind === "wait" && th.a.heading && th.a.heading !== th.a.location && this.places.has(th.a.heading)) { const nx = this.path(th.a.location, th.a.heading); if (nx) chosen = { kind: "move", to: nx }; }
       const eventStart = this.events.length;
-      const accepted = this.apply(th.a, chosen, `tier ${th.tier}: ${th.why}`);
+      const accepted = this.withBrainResult(proposal, () => this.apply(th.a, chosen, `tier ${th.tier}: ${th.why}`));
       recordDesireAttempt(th.a.desires ?? [], proposal.desire_id, this.t, chosen.kind, accepted, this.events.slice(eventStart).filter(e => e.actors.includes(th.a.id)));
       // they thought it over and did not write: the question goes unanswered, and the next letter that asks gets its own crossroads
       if (wasAsked && th.a.replyTo !== null) th.a.replyTo = null;
@@ -971,13 +974,14 @@ export class Town {
             known: !!(a.relationships.get(b.id) || b.relationships.get(a.id)), aToday: payer.plan?.day === this.day && payer.plan.goals.length ? payer.plan.goals.join("; ") : null, bToday: listener.plan?.day === this.day && listener.plan.goals.length ? listener.plan.goals.join("; ") : null,
           });
         } catch (err) { await refund(); this.retryAt.set(a.id, this.t + 5); this.retryAt.set(b.id, this.t + 5); this.log(`converse failed: ${(err as Error).message}`); continue; }
+        const response = d;
         a.lastConversation = this.t; b.lastConversation = this.t;
         a.needs.social = Math.max(0, a.needs.social - 0.5); b.needs.social = Math.max(0, b.needs.social - 0.5);
         const pair = [a, b];
         d = { ...d, lines: d.lines.map((l, i) => ({ ...l, speaker: this.resolveRef(l.speaker, pair) === b.id ? b.id : this.resolveRef(l.speaker, pair) === a.id ? a.id : (i % 2 === 0 ? a.id : b.id) })) };
         const transcript = d.lines.map((l) => `${this.agents.get(l.speaker)?.persona.name ?? l.speaker}: “${l.text}”`).join(" ");
         const importance = Math.min(1, 0.12 + Math.abs(d.outcome.a_trust_delta) * 3 + Math.abs(d.outcome.b_trust_delta) * 3 + (d.outcome.rumor ? 0.1 : 0));
-        this.emit("conversation", [a.id, b.id], placeId, `${a.persona.name} and ${b.persona.name} talked at ${place.name}. ${transcript}`, importance, { lines: d.lines });
+        this.emitFromBrain(response, "conversation", [a.id, b.id], placeId, `${a.persona.name} and ${b.persona.name} talked at ${place.name}. ${transcript}`, importance, { lines: d.lines });
         this.remember(a, `My interpretation of the conversation with ${b.persona.name}: ${d.outcome.a_remember}`, 0.3 + Math.abs(d.outcome.a_trust_delta) * 2, "reflect");
         this.remember(a, `Conversation at ${place.name}: ${transcript}`, importance, "rumor");
         this.remember(b, `My interpretation of the conversation with ${a.persona.name}: ${d.outcome.b_remember}`, 0.3 + Math.abs(d.outcome.b_trust_delta) * 2, "reflect");
@@ -1057,16 +1061,16 @@ export class Town {
       catch (err) { await refundReflection(); this.log(`reflect failed for ${a.persona.name}: ${(err as Error).message}`); continue; }
       this.remember(a, ref.summary, 0.75, "reflect");
       for (const i of ref.insights) this.remember(a, i, 0.6, "reflect");
-      for (const o0 of ref.opinions) { const about = this.resolveRef(o0.about); if (!this.agents.has(about) || about === a.id) continue; const o = { ...o0, about }; const r = this.rel(a, o.about); r.opinion = o.opinion; r.trust = clamp(r.trust + o.trust_delta); if (Math.abs(o.trust_delta) > 0.1) this.emit("relation.change", [a.id, o.about], undefined, `${a.persona.name} now thinks of ${this.agents.get(o.about)?.persona.name ?? o.about}: “${o.opinion}”`, 0.4 + Math.abs(o.trust_delta)); }
+      for (const o0 of ref.opinions) { const about = this.resolveRef(o0.about); if (!this.agents.has(about) || about === a.id) continue; const o = { ...o0, about }; const r = this.rel(a, o.about); r.opinion = o.opinion; r.trust = clamp(r.trust + o.trust_delta); if (Math.abs(o.trust_delta) > 0.1) this.emitFromBrain(ref, "relation.change", [a.id, o.about], undefined, `${a.persona.name} now thinks of ${this.agents.get(o.about)?.persona.name ?? o.about}: “${o.opinion}”`, 0.4 + Math.abs(o.trust_delta)); }
       a.desires = reviseDesires(a.desires ?? [], ref.desires ?? [], experiences, this.t, a.id);
       a.intentions = ref.intentions;
       if (ref.watch) a.watch = ref.watch.map((w) => w.trim()).filter(Boolean).slice(0, 4);
       // a saying: when two people find themselves saying the same thing, the island keeps it
-      if (ref.saying && ref.saying.trim().length > 3) { const text = ref.saying.trim(); let sy = this.sayings.find((x) => x.text.toLowerCase() === text.toLowerCase()); if (!sy) { sy = { text, by: [] }; this.sayings.push(sy); if (this.sayings.length > 60) this.sayings.shift(); } if (!sy.by.includes(a.id)) { sy.by.push(a.id); if (sy.by.length === 2) this.emit("town.saying", sy.by, a.location, `The island has a saying: “${text}”`, 0.5, { saying: text }); } }
+      if (ref.saying && ref.saying.trim().length > 3) { const text = ref.saying.trim(); let sy = this.sayings.find((x) => x.text.toLowerCase() === text.toLowerCase()); if (!sy) { sy = { text, by: [] }; this.sayings.push(sy); if (this.sayings.length > 60) this.sayings.shift(); } if (!sy.by.includes(a.id)) { sy.by.push(a.id); if (sy.by.length === 2) this.emitFromBrain(ref, "town.saying", sy.by, a.location, `The island has a saying: “${text}”`, 0.5, { saying: text }); } }
       // projects across weeks: a title repeated is the same project, updated; done is done, and the record hears of it
       for (const pr of ref.projects ?? []) {
         const title = pr.title.trim(); if (!title) continue; const have = a.projects.find((x) => x.title.toLowerCase() === title.toLowerCase() && !x.done);
-        if (have) { if (pr.why) have.why = pr.why.trim(); if (have.construction) continue; if (pr.progress) have.progress = pr.progress.trim(); if (pr.done) { have.done = true; have.doneDay = this.day; this.emit("town.notice", [a.id], a.location, `${a.persona.name} considers their personal goal finished: ${have.title}.`, 0.5, { project: have.title, reported: true }); this.remember(a, `I consider this done: ${have.title}. ${have.progress}`, 0.9, "reflect"); } }
+        if (have) { if (pr.why) have.why = pr.why.trim(); if (have.construction) continue; if (pr.progress) have.progress = pr.progress.trim(); if (pr.done) { have.done = true; have.doneDay = this.day; this.emitFromBrain(ref, "town.notice", [a.id], a.location, `${a.persona.name} considers their personal goal finished: ${have.title}.`, 0.5, { project: have.title, reported: true }); this.remember(a, `I consider this done: ${have.title}. ${have.progress}`, 0.9, "reflect"); } }
         else if (!pr.done && a.projects.filter((x) => !x.done).length < 3) { a.projects.push({ title, why: (pr.why ?? "").trim(), progress: (pr.progress ?? "just begun").trim(), since: this.day, done: false }); this.remember(a, `I have set myself something: ${title}. ${pr.why ?? ""}`.trim(), 0.7, "reflect"); }
       }
       if (a.projects.length > 12) a.projects = [...a.projects.filter((x) => !x.done), ...a.projects.filter((x) => x.done).slice(-6)];
@@ -1082,12 +1086,12 @@ export class Town {
           for (const [k, v] of changes) (p as unknown as Record<string, string>)[k] = v.trim();
           a.lastSelfDay = this.day;
           const said = changes.map(([k, v]) => k === "want" ? `now wants ${v}` : k === "fear" ? `now fears ${v}` : k === "summary" ? `would now say of themself: ${v}` : k === "strangers" ? `with strangers is now ${v}` : `takes advice ${v}`).join("; ");
-          this.emit("agent.became", [a.id], a.location, `${a.persona.name} ${said}`, 0.6, { changed: changes.map(([k]) => k) });
+          this.emitFromBrain(ref, "agent.became", [a.id], a.location, `${a.persona.name} ${said}`, 0.6, { changed: changes.map(([k]) => k) });
           this.remember(a, `I am not quite who I was. ${changes.map(([k, v]) => `${k}: ${v}`).join(" ")}`, 0.9, "reflect");
         }
       }
-      if (ref.letter_to_owner && a.owner) { this.emit("agent.letter", [a.id], a.location, `${a.persona.name} wrote to ${a.owner}: “${ref.letter_to_owner}”`, 0.8, { text: ref.letter_to_owner }); }
-      this.emit("agent.reflect", [a.id], a.location, `${a.persona.name} reflected: ${ref.summary}`, 0.2);
+      if (ref.letter_to_owner && a.owner) { this.emitFromBrain(ref, "agent.letter", [a.id], a.location, `${a.persona.name} wrote to ${a.owner}: “${ref.letter_to_owner}”`, 0.8, { text: ref.letter_to_owner }); }
+      this.emitFromBrain(ref, "agent.reflect", [a.id], a.location, `${a.persona.name} reflected: ${ref.summary}`, 0.2);
       a.memory = compress(age(a.memory, this.t));
     }
     for (const a of this.agents.values()) { a.doToday = 0; a.seenToday = []; }
@@ -1411,7 +1415,7 @@ export class Town {
       const ctx: JudgeContext = { agent: a, what, withName: b?.persona.name ?? null, place: place.name, placeKind: place.kind, hour: this.hour, weather: this.weather, nearby: this.nearby(a).map((x) => x.persona.name), inventory: [...a.inventory], coins: a.coins, stock: Object.entries(place.stock).filter(([, v]) => v > 0).map(([k, v]) => `${v} ${k}`) };
       let j; try { j = await this.brain.judge(ctx); } catch (err) { this.log(`judge failed for ${a.persona.name}: ${(err as Error).message}`); return; }
       const name = a.persona.name;
-      if (!j.plausible) { this.remember(a, `I tried to ${what}. ${j.happened}`, 0.4); this.emit("agent.do_outcome", [a.id], place.id, `${name} tried to ${what}: ${j.happened}`, 0.3, { what, happened: j.happened, plausible: false }); return; }
+      if (!j.plausible) { this.remember(a, `I tried to ${what}. ${j.happened}`, 0.4); this.emitFromBrain(j, "agent.do_outcome", [a.id], place.id, `${name} tried to ${what}: ${j.happened}`, 0.3, { what, happened: j.happened, plausible: false }); return; }
       const spent = Math.min(a.coins, j.coins_spent); if (spent > 0) { a.coins -= spent; const owner = place.owner ? this.agents.get(place.owner) : null; if (owner && owner.id !== a.id) owner.coins += spent; else place.treasury += spent; }
       if (j.item_lost && a.inventory.includes(j.item_lost)) a.inventory.splice(a.inventory.indexOf(j.item_lost), 1);
       const gained = j.item_gained && a.doToday <= 3 ? j.item_gained.toLowerCase().replace(/[^a-z ]/g, "").trim() : null; if (gained && !/coin|money|gold|silver/.test(gained)) a.inventory.push(gained);
@@ -1419,7 +1423,7 @@ export class Town {
       for (const t of j.trust) { const who = this.resolveRef(t.who, this.nearby(a)); if (this.agents.has(who) && who !== a.id) { this.nudge(this.agents.get(who)!, a.id, t.delta, t.delta / 2); } }
       this.remember(a, `I ${what}. ${j.happened}`, 0.55);
       for (const w of this.nearby(a)) this.remember(w, `${name} ${what}. ${j.happened}`, 0.4);
-      this.emit("agent.do_outcome", [a.id, ...(b ? [b.id] : [])], place.id, `${name}: ${what}. ${j.happened}${spent ? ` (${spent} coins)` : ""}${gained ? ` (now has ${gained})` : ""}`, 0.45, { what, happened: j.happened, spent, gained });
+      this.emitFromBrain(j, "agent.do_outcome", [a.id, ...(b ? [b.id] : [])], place.id, `${name}: ${what}. ${j.happened}${spent ? ` (${spent} coins)` : ""}${gained ? ` (now has ${gained})` : ""}`, 0.45, { what, happened: j.happened, spent, gained });
     }));
   }
   /** Something this person chose to watch, here and now: the place, someone present, or a word in what was just said. */
@@ -1473,7 +1477,7 @@ export class Town {
       try { persona = await this.brain.child(ctx); } catch (err) { this.log(`child failed: ${(err as Error).message}`); continue; }
       const child: Child = { id: `ch_${this.idPrefix}${(this.children.length + 1).toString(36)}${this.day}`, name: persona.name, bornDay: this.day, parents: [a.id, b.id], parentNames: [a.persona.name, b.persona.name], home: home.id, persona, adoptedBy: null, orphan: false };
       this.children.push(child);
-      this.emit("town.born", [a.id, b.id], home.id, `A child was born at ${home.name} to ${a.persona.name} and ${b.persona.name}: ${persona.name}.`, 0.9, { child: child.id });
+      this.emitFromBrain(persona, "town.born", [a.id, b.id], home.id, `A child was born at ${home.name} to ${a.persona.name} and ${b.persona.name}: ${persona.name}.`, 0.9, { child: child.id });
       this.remember(a, `${persona.name} was born. Ours.`, 1); this.remember(b, `${persona.name} was born. Ours.`, 1);
       for (const w of this.agents.values()) if (w !== a && w !== b && this.rng.chance(0.5)) this.remember(w, `${a.persona.name} and ${b.persona.name} have a child, ${persona.name}.`, 0.5, "rumor");
       break; // one birth a night
@@ -1559,7 +1563,7 @@ export class Town {
     const steps = plan.steps.map((st) => ({ hour: st.hour, do: st.do ?? "", place: st.place ? this.resolvePlace(st.place) : null })).map((st) => ({ ...st, place: st.place && this.places.has(st.place) ? st.place : null })).sort((x, y) => x.hour - y.hour).map((st) => ({ ...st, done: false }));
     a.plan = { ...plan, steps, day: this.day };
     a.lastThought = this.t;
-    if (plan.goals[0]) { this.remember(a, `What I meant to do today: ${plan.goals.join("; ")}`, 0.35, "plan"); this.emit("agent.plan", [a.id], a.location, `${a.persona.name} set out to ${lower(plan.goals[0])}`, 0.15, { goals: plan.goals, mood: plan.mood }); }
+    if (plan.goals[0]) { this.remember(a, `What I meant to do today: ${plan.goals.join("; ")}`, 0.35, "plan"); this.emitFromBrain(plan, "agent.plan", [a.id], a.location, `${a.persona.name} set out to ${lower(plan.goals[0])}`, 0.15, { goals: plan.goals, mood: plan.mood }); }
   }
 
   /** No boat runs in a storm, or when the ops room holds it. */
@@ -1894,9 +1898,19 @@ export class Town {
   }
   /** The intent behind the action being applied right now. Goes into the event so an owner can read why. */
   private because: string | null = null;
-  emit(kind: EventKind, actors: AgentId[], place: string | undefined, text: string, importance: number, payload?: Record<string, unknown>): TownEvent {
+  /** Model provenance is scoped only around the synchronous consequences of one structured answer. */
+  private eventBrainTrace: BrainTrace | null = null;
+  private traceOf(answer: unknown): BrainTrace { return brainTrace(answer) ?? { model: this.brain.name }; }
+  private withBrainResult<T>(answer: unknown, work: () => T): T {
+    const previous = this.eventBrainTrace; this.eventBrainTrace = this.traceOf(answer);
+    try { return work(); } finally { this.eventBrainTrace = previous; }
+  }
+  private emitFromBrain(answer: unknown, kind: EventKind, actors: AgentId[], place: string | undefined, text: string, importance: number, payload?: Record<string, unknown>): TownEvent {
+    return this.emit(kind, actors, place, text, importance, payload, this.traceOf(answer));
+  }
+  emit(kind: EventKind, actors: AgentId[], place: string | undefined, text: string, importance: number, payload?: Record<string, unknown>, trace: BrainTrace | null = this.eventBrainTrace): TownEvent {
     const withWhy = this.because && kind !== "action.rejected" ? { ...(payload ?? {}), because: this.because } : payload;
-    const e: TownEvent = { id: this.nextEventId++, t: this.t, day: this.day, kind, actors, text, importance: clamp(importance), ...(place ? { place } : {}), ...(withWhy ? { payload: withWhy } : {}) };
+    const e: TownEvent = { id: this.nextEventId++, t: this.t, day: this.day, kind, actors, text, importance: clamp(importance), ...(place ? { place } : {}), ...(trace ? { model: trace.model, ...(trace.modelTier ? { modelTier: trace.modelTier } : {}), ...(trace.modelCallId !== undefined ? { modelCallId: trace.modelCallId } : {}), ...(trace.requestedModel ? { requestedModel: trace.requestedModel } : {}) } : {}), ...(withWhy ? { payload: withWhy } : {}) };
     recordEvolution(this.evolution,e);
     recordBuildingMoment(e, this.places, this.agents);
     this.events.push(e); this.onEvent?.(e);

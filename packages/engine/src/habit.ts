@@ -41,7 +41,7 @@ export function habit(a: AgentState, v: HabitView): Action {
   }
 
   // Hunger: eat what is carried, buy what is sold here. A shift is worked hungry and the meal comes after; walking off to look for food is for the hours outside it, unless the body is already failing. The mind can overrule any of this.
-  const onShift = !!a.job && v.weekday !== 0 && (() => { const j = v.jobs.get(a.job!); return !!j && v.hour >= j.hours[0] && v.hour < j.hours[1]; })() && a.starving < 2;
+  const onShift = !!a.job && v.weekday !== 0 && (() => { const j = v.jobs.get(a.job!); return !!j && !broken(v.places.get(j.place), day) && v.hour >= j.hours[0] && v.hour < j.hours[1]; })() && a.starving < 2;
   if (a.needs.hunger > 0.6) {
     const has = a.inventory.find((i) => FOOD_ITEMS.has(i));
     if (has) return { kind: "use", item: has };
@@ -63,7 +63,7 @@ export function habit(a: AgentState, v: HabitView): Action {
   // Work: be at work during hours.
   if (a.job && v.weekday !== 0) {
     const job = v.jobs.get(a.job);
-    if (job && v.hour >= job.hours[0] && v.hour < job.hours[1]) {
+    if (job && !broken(v.places.get(job.place), day) && v.hour >= job.hours[0] && v.hour < job.hours[1]) {
       if (a.location === job.place) return { kind: "work" };
       const next = v.path(a.location, job.place);
       if (next) return { kind: "move", to: next };
@@ -78,7 +78,7 @@ export function habit(a: AgentState, v: HabitView): Action {
       (p.community?.phase === "funding" && p.community.coins >= p.community.target && (v.places.get("sawpit")?.stock.planks ?? 0) >= GARDEN.planks) ||
       (gardenReady(p, day, v.hour, v.weather, v.season) && p.community?.tendedDay?.[a.id] !== day)
     ));
-  if (site && v.hour >= 8 && v.hour < 18 && !(a.job && (() => { const j = v.jobs.get(a.job!); return j && v.hour >= j.hours[0] && v.hour < j.hours[1]; })())) {
+  if (site && v.hour >= 8 && v.hour < 18 && !onShift) {
     if (a.location === site.id) return { kind: "work" };
     const next = v.path(a.location, site.id);
     if (next) return { kind: "move", to: next };
@@ -86,7 +86,7 @@ export function habit(a: AgentState, v: HabitView): Action {
 
   // No job: go where the work is, so a thought can be spent on applying there.
   if (!a.job && v.hour >= 6 && v.hour < 17) {
-    const open = [...v.jobs.values()].filter((j) => j.holders.length < j.slots);
+    const open = [...v.jobs.values()].filter((j) => j.holders.length < j.slots && !broken(v.places.get(j.place), day));
     if (open.length > 0) {
       // pick a place with work and keep walking to it: the list of open jobs shifts every minute as people are taken on, and a person who re-picked each minute walked in circles
       // the ambitious pick by their own lights; everyone else takes the nearest post going
@@ -126,6 +126,8 @@ export function chooseBed(a: AgentState, v: HabitView): string {
   return "boatshed";
 }
 
+function broken(place: Place | undefined, day: number): boolean { return !!place?.brokenUntil && place.brokenUntil > day; }
+
 function cheapestFood(here: Place, v: HabitView): { item: string; price: number } | null {
   let best: { item: string; price: number } | null = null;
   for (const s of here.sells) {
@@ -136,7 +138,7 @@ function cheapestFood(here: Place, v: HabitView): { item: string; price: number 
   return best;
 }
 
-/** Where food is on the shelf and within the purse today: the nearest such place by the roads, the market first among equals; failing that, the nearest place that sells food at all. Nothing sold-out draws anyone. */
+/** Find an affordable stocked shelf, or a stocked shelf where help might be sought. Empty shelves never draw anyone. */
 function nearestFoodPlace(a: AgentState, v: HabitView): string | null {
   const order = ["market", "inn", "bakery", "fields"]; const rank = (id: string) => { const i = order.indexOf(id); return i < 0 ? order.length : i; };
   const far = (id: string) => v.hops ? (v.hops(a.location, id) ?? 99) : 0;
@@ -153,6 +155,6 @@ function nearestFoodPlace(a: AgentState, v: HabitView): string | null {
     if(preferred.id!==baseline.id)v.onFoodChoice?.(baseline.id,preferred.id);
     return preferred.id;
   }
-  // nothing they can afford: the nearest shelf that at least has food on it, before the nearest that merely sells it
-  return sellers.find((p) => cheapestFood(p, v) !== null)?.id ?? sellers[0]?.id ?? null;
+  // Without an affordable meal, someone may still seek a stocked shelf for help. An empty shelf is not a destination.
+  return sellers.find((p) => cheapestFood(p, v) !== null)?.id ?? null;
 }

@@ -16,6 +16,7 @@ export function sha256(text: string): string {
   return [h0, h1, h2, h3, h4, h5, h6, h7].map((x) => x.toString(16).padStart(8, "0")).join("");
 }
 /** One line per event, the same everywhere, so the same day always seals to the same hash. */
-export function canonicalEvent(e: { id: number; t: number; kind: string; actors: string[]; place?: string | undefined; text: string; importance: number }): string {
-  return JSON.stringify([e.id, e.t, e.kind, e.actors, e.place ?? null, e.text, Math.round(e.importance * 1000) / 1000]);
+export function canonicalEvent(e: { id: number; t: number; kind: string; actors: string[]; place?: string | undefined; text: string; importance: number; model?: string | undefined; modelTier?: string | undefined; modelCallId?: number | undefined; requestedModel?: string | undefined }): string {
+  const base = [e.id, e.t, e.kind, e.actors, e.place ?? null, e.text, Math.round(e.importance * 1000) / 1000];
+  return JSON.stringify(e.model || e.modelTier || e.modelCallId || e.requestedModel ? [...base, e.model ?? null, e.modelTier ?? null, e.requestedModel ?? null, e.modelCallId ?? null] : base);
 }
