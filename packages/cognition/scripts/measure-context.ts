@@ -7,14 +7,16 @@ import { buildReflectContext } from "../src/context/reflect.ts";
 import { cachePersona, withPrimer, type CognitiveContext } from "../src/context/shared.ts";
 import { buildMessages } from "../src/provider/openrouter.ts";
 import { cleanSchema } from "../src/schema/json.ts";
+import { compactActionSchema } from "../src/schema/compact.ts";
 import { WORLD, personaBlock, decidePrompt, conversePrompt, planPrompt, reflectPrompt } from "../src/prompts.ts";
 import type { CallKind } from "../src/model/router.ts";
 import { contexts } from "../test/fixtures.ts";
 
-/** No network or tokenizer dependency: count the exact text sent, including the JSON
- * schema in system. chars/4 is only an estimate, never provider-billed token usage. */
+/** No network or tokenizer dependency: include the response_format schema and,
+ * only for the historical legacy baseline, its second copy in system. */
 function size(kind: CallKind, context: CognitiveContext, schema: z.ZodType, primer: string, legacy = false) {
-  const schemaText = JSON.stringify(cleanSchema(z.toJSONSchema(schema)));
+  const canonical = cleanSchema(z.toJSONSchema(schema));
+  const schemaText = JSON.stringify(!legacy && kind === "action_proposal" ? compactActionSchema(canonical) : canonical);
   const messages = buildMessages(withPrimer(kind, context.system, primer), context.user);
   const blocks = messages[0]!.content as { text: string }[];
   const system = blocks.reduce((sum, block) => sum + block.text.length, 0) + (legacy ? schemaText.length : 0);

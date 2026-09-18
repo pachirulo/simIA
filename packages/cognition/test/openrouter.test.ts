@@ -113,7 +113,8 @@ describe("repairing an answer", () => {
     expect(m[3]!.content).toBe("Your answer did not fit: headline was 100 characters; the limit is 90. Return the same answer within the limits, as JSON only.");
   });
   it("a long paragraph alone is trimmed, not rejected", async () => {
-    const long = "A day of rain. ".repeat(110);
+    // Vary the record: token loops are now a semantic error, independently of length.
+    const long = Array.from({ length: 110 }, (_, day) => `Day ${day}: the harbor had rain. `).join("");
     const { bodies } = fakeFetch([{ text: long, headline: "Rain" }]);
     const b = new OpenRouterBrain({ apiKey: "k", ...models });
     const out = await b.digest({ agent: citizen("ada"), name: "Ada", day: 3, daysAway: 1, events: [], plan: null, letter: null, people: [], coins: 0, job: null, home: null, reflection: null, intentions: [], projects: [], trust: [] } as DigestContext);
@@ -137,7 +138,7 @@ describe("the deadline", () => {
     const b = new OpenRouterBrain({ apiKey: "k", ...models, timeoutMs: 30, reflectTimeoutMs: 30, log: (l) => lines.push(l) });
     const out = await b.judge({ agent: citizen("ada"), what: "whistle", withName: null, place: "square", placeKind: "square", hour: 9, weather: "fair", nearby: [], inventory: [], coins: 0, stock: [] } as JudgeContext);
     expect(seen).toHaveLength(1); expect(isFromFallback(out)).toBe(true);
-    expect(lines[0]).toBe("openrouter no answer in 0s; not replaying an uncertain request");
+    expect(lines).toContain("openrouter no answer in 0s; not replaying an uncertain request");
   });
 });
 
@@ -158,7 +159,7 @@ describe("an answer that arrives broken", () => {
     const out = await b.judge({ agent: citizen("ada"), ...judgeCtx } as JudgeContext);
     expect(isFromFallback(out)).toBe(true);
     expect(falls).toEqual(["no answer in 0s"]);
-    expect(lines[0]).toBe("openrouter no answer in 0s; not replaying an uncertain request");
+    expect(lines).toContain("openrouter no answer in 0s; not replaying an uncertain request");
   });
   it("an answer with nothing in it is simply asked again, with no empty turn a provider would refuse", async () => {
     const bodies: { messages: { role: string; content: unknown }[] }[] = [];

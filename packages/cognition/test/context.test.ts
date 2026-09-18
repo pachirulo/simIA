@@ -7,7 +7,7 @@ import { buildPlanContext } from "../src/context/plan.ts";
 import { buildReflectContext } from "../src/context/reflect.ts";
 import { cachePersona, withPrimer } from "../src/context/shared.ts";
 import { WORLD, personaBlock, decidePrompt, conversePrompt, planPrompt, reflectPrompt } from "../src/prompts.ts";
-import { WORLD_RULES } from "../src/prompts/world-rules.ts";
+import { DECIDE_RULES as WORLD_RULES } from "../src/prompts/decide-compact.ts";
 import { actionProposalSchema } from "../src/schema/action.ts";
 import { contexts } from "./fixtures.ts";
 

@@ -1,5 +1,15 @@
 # Arquitectura cognitiva: refactor interno
 
+Actualización semántica: [contratos y validaciones de cognición](cognition-semantic-contract.md).
+Esa actualización incorpora comprobaciones posteriores a Zod y comparte los builders de
+decisión, plan y reflexión con Anthropic directo. Las menciones posteriores a Anthropic
+sin cambios describen el refactor histórico, anterior a esa actualización.
+
+Actualización de prompts/OpenRouter: [auditoría de tokens del 17/09/2026](llm-token-optimization-2026-09-17.md).
+Documenta el benchmark real, la compactación equivalente del schema de salida,
+las instrucciones de decisión compactas y las diferencias de conducta observadas.
+Las cifras del refactor incluidas más abajo son históricas, no el baseline de esa auditoría.
+
 El engine sigue eligiendo `decide`, `converse`, `plan` o `reflect`. No hay otro router LLM ni nuevo estado cognitivo. `OpenRouterBrain` implementa la misma interfaz `Brain` y conserva opciones, modelos por defecto, callbacks, métodos de uso y exports anteriores.
 
 ## Recorrido y responsabilidades
@@ -23,6 +33,7 @@ La selección de modelo continúa siendo una función local, sin llamadas LLM. E
 | `src/prompts/core.ts` | Constitución común: prioridad de observaciones, procedencia de memorias, conocimiento limitado, agencia, restricciones físicas, cartas y voz. |
 | `src/prompts/world-rules.ts` | Una única definición de las reglas existentes, con nombres. Reconstruye el `WORLD` anterior para compatibilidad. |
 | `src/prompts/decide.ts` | Guía estable de decisión y selección de mecánicas según opciones/datos percibidos. |
+| `src/prompts/decide-compact.ts` | Redacción compacta exclusiva de decisión; mantiene grounding y restricciones y deja intactos los prompts de otras operaciones. |
 | `src/prompts/plan.ts` | Restricciones y oportunidades para organizar el día, sin el manual de sintaxis de todas las acciones. |
 | `src/prompts/persona.ts` | `personaBlock` original, sin quitar campos ni profundidad de personalidad. |
 | `src/model/router.ts` | `CallKind`, `Slot`, `Models`, `SLOT_OF` y `chooseModel` originales. |
@@ -30,6 +41,7 @@ La selección de modelo continúa siendo una función local, sin llamadas LLM. E
 | `src/provider/response.ts` | Límites y truncado de prosa, notas de reparación y marca no enumerable de fallback. |
 | `src/schema/json.ts` | `cleanSchema`, `strictSchema`, `stripNulls`, detección del modo estricto. |
 | `src/schema/action.ts` | Punto único de selección del schema de acciones; por compatibilidad devuelve el canónico. |
+| `src/schema/compact.ts` | Compacta sólo la representación enviada de ActionProposal; agrupa alternativas equivalentes y conserva el validador canónico. |
 | `scripts/measure-context.ts` | Comparación reproducible sin red, usando los mismos datos y schemas antes/después. |
 | `test/fixtures.ts` | Estado y percepción creados por un `Town` real y contextos tipados representativos. |
 | `test/context.test.ts` | Conservación de información, selección de reglas, reducción, inmutabilidad y compatibilidad de `WORLD`. |

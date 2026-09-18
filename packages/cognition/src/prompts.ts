@@ -1,4 +1,5 @@
 import type { ChildContext, DigestContext, PaperContext, LifeContext, JudgeContext } from "@unwatched/engine";
+import { publicPaperContext, paperRecords } from "./context/paper.ts";
 
 /** Compatibility exports: existing consumers (including AnthropicBrain) keep their prompts. */
 export { WORLD } from "./prompts/world-rules.ts";
@@ -13,13 +14,13 @@ You print only what was done or said where others could see it. You never know w
 The lead is a story with a shape: what happened, who it touches, what is known and what is not yet. If yesterday's lead moved today, follow it and say what changed; if it did not move, it is not today's lead. Briefs are other matters, not the lead again; each stands on its own, two to five sentences. The lead runs to five or six paragraphs at most. Notices are practical: work open and what it pays, what is short on the shelf, what someone offers or asks, what the council will hear. Then three standing columns in a line or two each: "market" (what the shelf holds and what it costs, what ran out), "harbor" (the boat, the cargo, who came and who went, by name), "tomorrow" (what the day holds: the weekday, a market day, a council, a feast, a gathering). Headlines read like a small-town paper: a fact, not a tease. Answer with JSON only.`;
 
 export function paperPrompt(ctx: PaperContext): string {
+  ctx = publicPaperContext(ctx);
   return `Edition ${ctx.edition}, ${ctx.date}, weather ${ctx.weather}. Population ${ctx.population}, ${ctx.arrivals} arrived, ${ctx.departures} left. Mayor: ${ctx.mayor ?? "none yet"}. Open proposals at the council: ${ctx.laws.join(" | ") || "none"}.
 ${ctx.yesterday ? `Yesterday's front page: "${ctx.yesterday.headline}" (${ctx.yesterday.deck}). Yesterday's briefs: ${ctx.yesterday.briefs.join(" | ") || "none"}.` : "This is the first edition."}
-The day's record, most important first:
-${ctx.events.map((e, i) => `${i + 1}. [${e.importance.toFixed(2)}] ${e.text}`).join("\n") || "(a quiet day; nothing of note)"}
+${paperRecords(ctx.events)}
 The shelf at the market this evening: ${ctx.market.map((m) => `${m.item} ${m.stock} left${m.price !== null ? ` at ${m.price}` : ""}`).join(", ") || "nothing on it"}.
 The harbor today: ${ctx.harbor.join(" | ") || "the boat came and went without news"}. Came: ${ctx.came.join(", ") || "nobody"}. Went: ${ctx.went.join(" | ") || "nobody"}.
-Tomorrow: ${ctx.tomorrow}.
+Tomorrow (supplied calendar; no additional event is established): ${ctx.tomorrow}.
 ${ctx.writings.length ? `What citizens wrote for others to read today: ${ctx.writings.join(" | ")}` : ""}
 Write the paper: one lead story, up to four briefs, notices, and the three columns.`;
 }

@@ -1,0 +1,721 @@
+[
+  {
+    "generationId": "gen-1789692217-ZD1y6gKFhx6LxqsMuSrt",
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_2",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Inés Vidal",
+            "place": "market",
+            "asleep": false
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 13:00",
+        "day": 1,
+        "minute": 780,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "market",
+        "needs": {
+          "hunger": 0.8759999999999998,
+          "rest": 0.6320000000000001,
+          "social": 0.24772032821178455
+        },
+        "feels": {
+          "hunger": "starving; a day that ends like this counts against you",
+          "rest": "a little worn",
+          "social": "content"
+        },
+        "coins": 40,
+        "inventory": [
+          "suitcase"
+        ],
+        "job": null,
+        "shift": null,
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        },
+        "mayor": true
+      },
+      "nearby": [
+        {
+          "agent": "ag_1",
+          "name": "Inés Vidal",
+          "relation": {
+            "trust": 0.19999999999999998,
+            "affection": 0.25,
+            "opinion": ""
+          },
+          "asleep": false
+        }
+      ],
+      "place": {
+        "id": "market",
+        "name": "la plaza del mercado",
+        "kind": "market",
+        "for_sale": [
+          {
+            "item": "bread",
+            "price": 1
+          },
+          {
+            "item": "apples",
+            "price": 1
+          },
+          {
+            "item": "fish",
+            "price": 1
+          }
+        ],
+        "jobs_open": [],
+        "exits": [
+          "harbor",
+          "inn",
+          "bakery",
+          "chandlery",
+          "tavern",
+          "council",
+          "hill",
+          "chapel",
+          "smithy",
+          "lane"
+        ],
+        "owner": null,
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 720; reported speech, not verified experience] Conversation at la plaza del mercado: Inés Vidal: “Pedro, ¿sigues con el horno o ya miras a otro oficio? Yo ando buscando quién me traiga el pan fresco para el mesón.” Pedro Ibáñez: “El horno tira, pero la harina es de fuera. ¿Tú crees que el molino de aquí vuelve a moler pronto? Eso me arreglaría la vida.” Inés Vidal: “Dicen que el molinero anda escaso de mano de obra. No me lo cuentes a mí, que yo solo sirvo mesas y guardo secretos ajenos. Si te interesa, pregunta mañana en el molino.”",
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la Casa del Concejo (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; personal interpretation, not verified experience] My interpretation of the conversation with Inés Vidal: Inés sugiere preguntar en el molino pero no promete nada.",
+        "[minute 720; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; reported speech, not verified experience] Inés Vidal told me: El molinero anda escaso de mano de obra.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn."
+      ],
+      "owner_letters": [],
+      "crossroads": "Inés Vidal and Pedro Ibáñez talked at la plaza del mercado. Inés Vidal: “Pedro, ¿sigues con el horno o ya miras a otro oficio? Yo ando buscando quién me traiga el pan fresco para el mesón.” Pedro Ibáñez: “El horno tira, pero la harina es de fuera. ¿Tú crees que el molino de aquí vuelve a moler pronto? Eso me arreglaría la vida.” Inés Vidal: “Dicen que el molinero anda escaso de mano de obra. No me lo cuentes a mí, que yo solo sirvo mesas y guardo secretos ajenos. Si te interesa, pregunta mañana en el molino.”",
+      "today": {
+        "mood": "Cansado y desconfiado, con ganas de encontrar mi sitio",
+        "goals": [
+          "Buscar trabajo en el horno o en el molino",
+          "Conocer a alguien del pueblo, sobre todo del molino",
+          "Comer algo barato y descansar"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "",
+            "place": "bakery",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 8,
+            "do": "",
+            "place": "mill",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 10,
+            "do": "",
+            "place": "market",
+            "done": true
+          },
+          {
+            "hour": 13,
+            "do": "",
+            "place": "inn",
+            "done": false
+          },
+          {
+            "hour": 17,
+            "do": "",
+            "place": "chapel",
+            "done": false
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "decorate",
+        "propose_skill",
+        "lend",
+        "call"
+      ],
+      "deadline_ms": 8000
+    },
+    "response": {
+      "action": {
+        "kind": "trade",
+        "with": "market",
+        "buy": "bread",
+        "sell": "",
+        "coins": 1
+      },
+      "intent": "Comer algo barato ahora que estoy muerto de hambre, aunque sea domingo y no haya mucho más que hacer.",
+      "remember": []
+    }
+  },
+  {
+    "generationId": "gen-1789692240-PWY3DOExJc3e8VTM5H1w",
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_2",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Inés Vidal",
+            "place": "market",
+            "asleep": false
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 23:00",
+        "day": 1,
+        "minute": 1380,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "hill",
+        "needs": {
+          "hunger": 0.9759999999999998,
+          "rest": 1,
+          "social": 0.6823707384765151
+        },
+        "feels": {
+          "hunger": "starving; a day that ends like this counts against you",
+          "rest": "exhausted",
+          "social": "lonely"
+        },
+        "coins": 38,
+        "inventory": [
+          "suitcase",
+          "apples"
+        ],
+        "job": null,
+        "shift": null,
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        },
+        "mayor": true,
+        "learned_food": [
+          {
+            "place": "market",
+            "item": "bread",
+            "confidence": 0.6625666360195966,
+            "observations": 1
+          },
+          {
+            "place": "orchard",
+            "item": "apples",
+            "confidence": 0.665294223429235,
+            "observations": 1
+          }
+        ]
+      },
+      "nearby": [],
+      "place": {
+        "id": "hill",
+        "name": "el camino de la loma",
+        "kind": "public",
+        "for_sale": [],
+        "jobs_open": [],
+        "exits": [
+          "market",
+          "chapel",
+          "mill",
+          "fields",
+          "orchard",
+          "pinewood"
+        ],
+        "owner": null,
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 1380; recorded observation; quoted claims remain claims] Observed local state at el camino de la loma (hill): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; reported speech, not verified experience] Conversation at la plaza del mercado: Inés Vidal: “Pedro, ¿sigues con el horno o ya miras a otro oficio? Yo ando buscando quién me traiga el pan fresco para el mesón.” Pedro Ibáñez: “El horno tira, pero la harina es de fuera. ¿Tú crees que el molino de aquí vuelve a moler pronto? Eso me arreglaría la vida.” Inés Vidal: “Dicen que el molinero anda escaso de mano de obra. No me lo cuentes a mí, que yo solo sirvo mesas y guardo secretos ajenos. Si te interesa, pregunta mañana en el molino.”",
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 1260; recorded observation; quoted claims remain claims] Observed local state at el huerto viejo (orchard): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la Casa del Concejo (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 1380; recorded observation; quoted claims remain claims] I am very hungry and have nothing to eat.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details."
+      ],
+      "owner_letters": [],
+      "today": {
+        "mood": "Cansado y desconfiado, con ganas de encontrar mi sitio",
+        "goals": [
+          "Buscar trabajo en el horno o en el molino",
+          "Conocer a alguien del pueblo, sobre todo del molino",
+          "Comer algo barato y descansar"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "",
+            "place": "bakery",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 8,
+            "do": "",
+            "place": "mill",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 10,
+            "do": "",
+            "place": "market",
+            "done": true
+          },
+          {
+            "hour": 13,
+            "do": "",
+            "place": "inn",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 17,
+            "do": "",
+            "place": "chapel",
+            "done": true
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "decorate",
+        "propose_skill",
+        "call"
+      ],
+      "deadline_ms": 8000
+    },
+    "response": {
+      "action": {
+        "kind": "move",
+        "to": "market"
+      },
+      "intent": "Comprar pan en el mercado para no pasar la noche con hambre.",
+      "remember": []
+    }
+  },
+  {
+    "generationId": "gen-1789692238-ryIEvjWTNtelcAZjWZ7g",
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_2",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Inés Vidal",
+            "place": "market",
+            "asleep": false
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 21:00",
+        "day": 1,
+        "minute": 1260,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "orchard",
+        "needs": {
+          "hunger": 0.8319999999999999,
+          "rest": 1,
+          "social": 0.5954406564235689
+        },
+        "feels": {
+          "hunger": "very hungry",
+          "rest": "exhausted",
+          "social": "could use company"
+        },
+        "coins": 38,
+        "inventory": [
+          "suitcase",
+          "apples"
+        ],
+        "job": null,
+        "shift": null,
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        },
+        "mayor": true,
+        "learned_food": [
+          {
+            "place": "market",
+            "item": "bread",
+            "confidence": 0.6634732455166608,
+            "observations": 1
+          },
+          {
+            "place": "orchard",
+            "item": "apples",
+            "confidence": 0.6662085516625176,
+            "observations": 1
+          }
+        ]
+      },
+      "nearby": [],
+      "place": {
+        "id": "orchard",
+        "name": "el huerto viejo",
+        "kind": "workplace",
+        "for_sale": [
+          {
+            "item": "apples",
+            "price": 1
+          }
+        ],
+        "jobs_open": [
+          "orchard.picker"
+        ],
+        "exits": [
+          "fields",
+          "hill",
+          "shore"
+        ],
+        "owner": null,
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 720; reported speech, not verified experience] Conversation at la plaza del mercado: Inés Vidal: “Pedro, ¿sigues con el horno o ya miras a otro oficio? Yo ando buscando quién me traiga el pan fresco para el mesón.” Pedro Ibáñez: “El horno tira, pero la harina es de fuera. ¿Tú crees que el molino de aquí vuelve a moler pronto? Eso me arreglaría la vida.” Inés Vidal: “Dicen que el molinero anda escaso de mano de obra. No me lo cuentes a mí, que yo solo sirvo mesas y guardo secretos ajenos. Si te interesa, pregunta mañana en el molino.”",
+        "[minute 1260; recorded observation; quoted claims remain claims] Observed local state at el huerto viejo (orchard): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la Casa del Concejo (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; personal interpretation, not verified experience] My interpretation of the conversation with Inés Vidal: Inés sugiere preguntar en el molino pero no promete nada.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn."
+      ],
+      "owner_letters": [],
+      "today": {
+        "mood": "Cansado y desconfiado, con ganas de encontrar mi sitio",
+        "goals": [
+          "Buscar trabajo en el horno o en el molino",
+          "Conocer a alguien del pueblo, sobre todo del molino",
+          "Comer algo barato y descansar"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "",
+            "place": "bakery",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 8,
+            "do": "",
+            "place": "mill",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 10,
+            "do": "",
+            "place": "market",
+            "done": true
+          },
+          {
+            "hour": 13,
+            "do": "",
+            "place": "inn",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 17,
+            "do": "",
+            "place": "chapel",
+            "done": true
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "propose_skill",
+        "call"
+      ],
+      "deadline_ms": 8000
+    },
+    "response": {
+      "action": {
+        "kind": "sleep"
+      },
+      "intent": "Estoy agotado, mejor descansar aquí en el huerto aunque sea un rincón; mañana ya haré algo con la harina.",
+      "remember": []
+    }
+  },
+  {
+    "generationId": "gen-1789692174-XhyvJFztjRtjqUg1OVto",
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_1",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Pedro Ibáñez",
+            "place": "harbor",
+            "asleep": false
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 08:00",
+        "day": 1,
+        "minute": 480,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "inn",
+        "needs": {
+          "hunger": 0.516,
+          "rest": 0.362,
+          "social": 0.47368548445403585
+        },
+        "feels": {
+          "hunger": "hungry",
+          "rest": "rested",
+          "social": "could use company"
+        },
+        "coins": 40,
+        "inventory": [
+          "suitcase"
+        ],
+        "job": "mozo del mesón",
+        "shift": {
+          "place": "inn",
+          "wage": 2,
+          "hours": [
+            8,
+            16
+          ]
+        },
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        }
+      },
+      "nearby": [],
+      "place": {
+        "id": "inn",
+        "name": "el Mesón del Puente",
+        "kind": "inn",
+        "for_sale": [
+          {
+            "item": "soup",
+            "price": 2
+          },
+          {
+            "item": "bread",
+            "price": 1
+          }
+        ],
+        "jobs_open": [
+          "inn.help"
+        ],
+        "exits": [
+          "harbor",
+          "market"
+        ],
+        "owner": null,
+        "stock": {
+          "bread": 6,
+          "soup": 8,
+          "fish": 4
+        },
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 420; recorded observation; quoted claims remain claims] I got work as mozo del mesón. 2 coins a shift.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at el Mesón del Puente (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 360; intention, not completed work] What I meant to do today: desayunar y reconocer el pueblo; presentarme en el mesón y en sitios con trabajo; preguntar por el pueblo y las gentes"
+      ],
+      "owner_letters": [],
+      "crossroads": "Inés Vidal was taken on as mozo del mesón.",
+      "today": {
+        "mood": "algo cansada pero curiosa",
+        "goals": [
+          "desayunar y reconocer el pueblo",
+          "presentarme en el mesón y en sitios con trabajo",
+          "preguntar por el pueblo y las gentes"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "",
+            "place": "inn",
+            "done": true
+          },
+          {
+            "hour": 7,
+            "do": "",
+            "place": "market",
+            "done": false
+          },
+          {
+            "hour": 8,
+            "do": "",
+            "place": "tavern",
+            "done": false
+          },
+          {
+            "hour": 9,
+            "do": "",
+            "place": "harbor",
+            "done": false
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "propose_skill",
+        "make",
+        "call",
+        "search"
+      ],
+      "deadline_ms": 8000
+    },
+    "response": {
+      "action": {
+        "kind": "say",
+        "text": "Buenos días, Pedro. ¿Qué se cuenta por el puerto esta mañana?"
+      },
+      "intent": "Saludar a Pedro y enterarme de las novedades del pueblo antes de empezar la jornada.",
+      "remember": []
+    }
+  }
+]

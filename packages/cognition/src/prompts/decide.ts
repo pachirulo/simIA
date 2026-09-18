@@ -1,21 +1,29 @@
 import type { Perception } from "@unwatched/protocol";
-import { CORE } from "./core.ts";
-import { WORLD_RULES as rules } from "./world-rules.ts";
+import { DECIDE_CORE, DECIDE_RULES as rules, DECIDE_TASK } from "./decide-compact.ts";
+import { urgentNeeds, workIssue } from "../semantics/decision.ts";
 
 /** Stable guidance supports choosing a destination as well as acting here. */
-export const DECIDE_SYSTEM = [CORE, rules.property, rules.beliefs, rules.supply, rules.survival,
-  "Choose one supported action. Perception.options describes local opportunities; the engine validates the result.",
+export const DECIDE_SYSTEM = [DECIDE_CORE, rules.property, rules.beliefs, rules.supply, rules.survival,
+  "options lists supported action types, NOT currently valid actions or a complete allowlist. Check prerequisites in current state; the engine validates execution.",
   "Elsewhere you may build, trade, shape a workplace, join a voluntary institution, learn a procedure, help a shared garden, make a promise or visit the council. Travel first when the action needs another place.",
+  DECIDE_TASK,
 ].join("\n");
 
 /** Mechanics depend on perceived opportunities, never on a second copy of agent state.
  * These go after the cache boundary so changing location cannot invalidate the shared prefix. */
 export function decideRules(p: Perception): string {
   const has = (...kinds: Perception["options"][number][]) => kinds.some(kind => p.options.includes(kind));
+  const work = workIssue(p);
+  const urgent = urgentNeeds(p);
   return [
+    urgent.length > 0 && `- Urgent now: ${urgent.join(", ")}. Check an immediate remedy before optional activity; a skill or plan does not execute its steps.`,
+    has("trade") && '- trade: buy/sell name items; sell must be carried. Omit with for this shop; with identifies a person/place, never the item. Buying adds inventory; use eats later.',
+    has("work", "apply") && (p.place.site || p.place.community
+      ? "- Site/garden work has its own prerequisites; it is not a wage shift or guaranteed income."
+      : `- Wage work needs an assigned job, its place and shift hours, never Sunday. apply requests employment; vacancies are not jobs you hold.${work ? ` Now: ${work.message}` : ""}`),
     has("stock") && '- Own a place and stock it: sell an available item at your price.',
     has("make") && '- At your workplace, make a new item from materials on hand; the island learns the recipe and the boat pays its material value.',
-    has("call") && '- Call your current place by a name; when three people use it, the island does.',
+    has("call") && '- Call your current place by a name; when three people use it, the island does. call ONLY names a place, never invokes an action; operations belong in action.kind.',
     has("decorate") && rules.decoration,
     (has("start_project", "contribute_project", "withdraw_project") || p.place.community || p.town?.projects?.length) && rules.garden,
     p.town?.projects?.length && rules.volunteering,

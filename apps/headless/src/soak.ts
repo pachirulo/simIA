@@ -85,3 +85,5 @@ console.log(`  ${digest.headline}`);
 for (const e of digest.items.slice(0, 8)) console.log(`  ${town.clock(e.t)}  ${e.text.slice(0, 140)}`);
 if (brain instanceof OpenRouterBrain) { const u = brain.usage(); console.log(`\nOpenRouter: ${u.calls} calls · ${u.prompt} prompt tokens · ${u.completion} completion tokens`); }
 console.log(`\nWrote ${outDir}/events.jsonl, ${outDir}/gazette-day*.md, ${outDir}/summary.json`);
+// The simulation and its outputs are finished; drain only background diagnostics.
+if (brain instanceof OpenRouterBrain) await brain.flushLogs();

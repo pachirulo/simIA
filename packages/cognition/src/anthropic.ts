@@ -1,9 +1,17 @@
+import { publicPaperContext } from "./context/paper.ts";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { ActionProposal, Dialogue, Paper, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
 import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, Tier, PlanContext, DigestContext, ChildContext, LifeContext, JudgeContext } from "@unwatched/engine";
 import { MockBrain } from "./mock.ts";
-import { WORLD, personaBlock, decidePrompt, conversePrompt, reflectPrompt, paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, planPrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
+import { buildDecideContext } from "./context/decide.ts";
+import { buildPlanContext } from "./context/plan.ts";
+import { buildReflectContext } from "./context/reflect.ts";
+import { decisionIssue } from "./semantics/decision.ts";
+import { normalizeOptionalStrings } from "./schema/normalize.ts";
+import { planIssue, reflectionIssue } from "./semantics/lifecycle.ts";
+import { outputQualityIssue, semanticRepairNote } from "./semantics/quality.ts";
+import { WORLD, personaBlock, conversePrompt, paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
 
 export interface AnthropicBrainOptions {
   routine?: string;   // tier 1
@@ -39,26 +47,37 @@ export class AnthropicBrain implements Brain {
   /** The request options every call carries: a deadline by tier and one retry, so a stalled model cannot hold the morning. */
   private opts(model: string) { return { timeout: model === this.reflectModel ? this.reflectTimeoutMs : this.timeoutMs, maxRetries: 1 }; }
 
-  private system(a: AgentState) {
+  private system(a: AgentState, shared = WORLD) {
     // Stable prefix first (world, persona), cached. Volatile content goes in the user turn.
     return [
-      { type: "text" as const, text: WORLD },
+      { type: "text" as const, text: shared },
       { type: "text" as const, text: personaBlock(a), cache_control: { type: "ephemeral" as const } },
     ];
   }
 
   async decide(p: Perception, a: AgentState, tier: Tier): Promise<ActionProposal> {
     const model = tier >= 2 ? this.stakes : this.routine;
+    const context = buildDecideContext(p, a);
+    const messages: { role: "user"; content: string }[] = [{ role: "user", content: context.user }];
+    const fallback = async (): Promise<ActionProposal> => {
+      const out = await this.fallback.decide(p, a, tier);
+      return decisionIssue(out, p) ? { action: { kind: "wait" }, remember: [] } : out;
+    };
     try {
-      const res = await this.client.messages.parse({
-        model, max_tokens: 1024,
-        system: this.system(a),
-        messages: [{ role: "user", content: decidePrompt(p) }],
-        output_config: { format: zodOutputFormat(ActionProposal) },
-      }, this.opts(model));
-      if (res.stop_reason === "refusal" || !res.parsed_output) return this.fallback.decide(p, a, tier);
-      return res.parsed_output;
-    } catch (err) { return this.handle(err, () => this.fallback.decide(p, a, tier)); }
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await this.client.messages.parse({
+          model, max_tokens: 1024, system: this.system(a, context.system.shared), messages,
+          output_config: { format: zodOutputFormat(ActionProposal) },
+        }, this.opts(model));
+        if (res.stop_reason === "refusal" || !res.parsed_output) return fallback();
+        const out = ActionProposal.parse(normalizeOptionalStrings(res.parsed_output, ActionProposal));
+        const issue = decisionIssue(out, p);
+        if (!issue) return out;
+        this.log(`semantic mismatch from ${model}: ${issue.code} at ${issue.path}`);
+        messages.push({ role: "user", content: semanticRepairNote(issue) });
+      }
+      return fallback();
+    } catch (err) { return this.handle(err, fallback); }
   }
 
   async converse(ctx: ConverseContext): Promise<Dialogue> {
@@ -77,27 +96,29 @@ export class AnthropicBrain implements Brain {
 
   async reflect(ctx: ReflectContext): Promise<Reflection> {
     const a = ctx.agent;
+    const context = buildReflectContext(ctx);
     try {
       const res = await this.client.messages.parse({
         model: this.reflectModel, max_tokens: 2000,
-        system: this.system(a),
-        messages: [{ role: "user", content: reflectPrompt(ctx) }],
+        system: this.system(a, context.system.shared),
+        messages: [{ role: "user", content: context.user }],
         output_config: { format: zodOutputFormat(Reflection) },
       }, this.opts(this.reflectModel));
-      if (res.stop_reason === "refusal" || !res.parsed_output) return this.fallback.reflect(ctx);
+      if (res.stop_reason === "refusal" || !res.parsed_output || outputQualityIssue(res.parsed_output) || reflectionIssue(res.parsed_output)) return this.fallback.reflect(ctx);
       return res.parsed_output;
     } catch (err) { return this.handle(err, () => this.fallback.reflect(ctx)); }
   }
 
   async plan(ctx: PlanContext, tier: Tier): Promise<DayPlan> {
+    const context = buildPlanContext(ctx);
     try {
       const res = await this.client.messages.parse({
         model: tier >= 2 ? this.stakes : this.routine, max_tokens: 1200,
-        system: this.system(ctx.agent),
-        messages: [{ role: "user", content: planPrompt(ctx) }],
+        system: this.system(ctx.agent, context.system.shared),
+        messages: [{ role: "user", content: context.user }],
         output_config: { format: zodOutputFormat(DayPlan) },
       }, this.opts(tier >= 2 ? this.stakes : this.routine));
-      if (res.stop_reason === "refusal" || !res.parsed_output) return this.fallback.plan(ctx, tier);
+      if (res.stop_reason === "refusal" || !res.parsed_output || outputQualityIssue(res.parsed_output) || planIssue(res.parsed_output, ctx)) return this.fallback.plan(ctx, tier);
       return res.parsed_output;
     } catch (err) { return this.handle(err, () => this.fallback.plan(ctx, tier)); }
   }
@@ -117,6 +138,7 @@ export class AnthropicBrain implements Brain {
     } catch (err) { return this.handle(err, () => this.fallback.child(ctx)); }
   }
   async writePaper(ctx: PaperContext): Promise<Paper> {
+    ctx = publicPaperContext(ctx);
     try {
       const res = await this.client.messages.parse({
         model: this.reflectModel, max_tokens: 3000,

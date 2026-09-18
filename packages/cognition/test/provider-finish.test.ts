@@ -11,7 +11,7 @@ function setup(replies: unknown[]) {
     return new Response(JSON.stringify(replies.shift()));
   }));
   const log = vi.fn(), fallback = vi.fn(), usage: ProviderUsage[] = [];
-  const p = new OpenRouterProvider({ apiKey: "test", log });
+  const p = new OpenRouterProvider({ apiKey: "test", log, logGeneration: false });
   p.onUsage = u => usage.push(u); p.onFallback = fallback;
   const call = (model = "deepseek/deepseek-v4-flash-0731") => p.call("day_plan", model, "routine", { shared: "JSON" }, "test", schema, 1200);
   return { p, bodies, log, fallback, usage, call };

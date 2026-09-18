@@ -1,12 +1,17 @@
+import { publicPaperContext } from "./context/paper.ts";
 import { actionProposalSchema } from "./schema/action.ts";
 import { buildDecideContext } from "./context/decide.ts";
 import { buildPlanContext } from "./context/plan.ts";
 import { buildConverseContext } from "./context/converse.ts";
 import { buildReflectContext } from "./context/reflect.ts";
 import { OpenRouterProvider, type ProviderUsage } from "./provider/openrouter.ts";
+import { safeLog, type OpenRouterLoggingOptions } from "./provider/logging.ts";
 import { chooseModel, type CallKind, type Slot, type Models } from "./model/router.ts";
 import { markFallback } from "./provider/response.ts";
 import { withPrimer, type SystemContext } from "./context/shared.ts";
+import { decisionIssue } from "./semantics/decision.ts";
+import { planIssue, reflectionIssue } from "./semantics/lifecycle.ts";
+import type { OutputCheck } from "./semantics/quality.ts";
 export { chooseModel, SLOT_OF } from "./model/router.ts";
 export type { CallKind, Slot, Models } from "./model/router.ts";
 export { PROSE_CAPS, trimProse, truncateProse, repairNote, markFallback, isFromFallback } from "./provider/response.ts";
@@ -17,7 +22,7 @@ import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, 
 import { MockBrain } from "./mock.ts";
 import { paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
 
-export interface OpenRouterBrainOptions {
+export interface OpenRouterBrainOptions extends OpenRouterLoggingOptions {
   /** Production must not deliver mock output as a paid model response. */
   allowFallback?: boolean;
   apiKey?: string;
@@ -54,11 +59,13 @@ export class OpenRouterBrain implements Brain {
       stakes: o.stakes ?? process.env.UW_OR_MODEL_STAKES ?? "anthropic/claude-sonnet-5",
       reflect: o.reflect ?? process.env.UW_OR_MODEL_REFLECT ?? "anthropic/claude-opus-5",
     };
-    this.log = o.log ?? (() => {});
+    this.log = safeLog(o.log);
   }
 
   usage() { return this.provider.usage(); }
   cachedTokens() { return this.provider.cachedTokens(); }
+  /** Drain optional generation metadata after a CLI run, outside simulation. */
+  flushLogs() { return this.provider.flushLogs(); }
   get onUsage() { return this.provider.onUsage; }
   set onUsage(hook: ((usage: ProviderUsage) => void) | null) { this.provider.onUsage = hook; }
   get onFallback() { return this.provider.onFallback; }
@@ -78,15 +85,19 @@ export class OpenRouterBrain implements Brain {
   }
   private stood<T extends object>(kind: CallKind, model: string, out: T): T { if (!this.allowFallback) throw new Error(`Model unavailable: ${kind} (${model}); no synthetic response delivered`); this.log(`warn: fallback stood in for ${kind} (${model})`); return markFallback(out); }
 
-  private call<T>(name: CallKind, model: string, slot: Slot, system: SystemContext, user: string, schema: z.ZodType<T>, maxTokens: number, agentId: string | null = null) {
-    return this.provider.call(name, model, slot, withPrimer(name, system, this.primer), user, schema, maxTokens, agentId);
+  private call<T>(name: CallKind, model: string, slot: Slot, system: SystemContext, user: string, schema: z.ZodType<T>, maxTokens: number, agentId: string | null = null, check?: OutputCheck<T>) {
+    return this.provider.call(name, model, slot, withPrimer(name, system, this.primer), user, schema, maxTokens, agentId, check);
   }
 
   async decide(p: Perception, a: AgentState, tier: Tier): Promise<ActionProposal> {
     const { model, slot } = this.pick("action_proposal", a, tier >= 2 ? "stakes" : "routine");
     const { system, user } = buildDecideContext(p, a);
-    const out = await this.call("action_proposal", model, slot, system, user, actionProposalSchema(p), 1024, a.id);
-    return out ?? this.stood("action_proposal", model, await this.fallback.decide(p, a, tier));
+    const out = await this.call("action_proposal", model, slot, system, user, actionProposalSchema(p), 1024, a.id, value => decisionIssue(value, p));
+    if (out) return out;
+    const fallback = await this.fallback.decide(p, a, tier);
+    // Synthetic fallback must not bypass the same semantic boundary or store a
+    // pre-execution claim. Preserve the existing marked fallback/strict-mode policy.
+    return this.stood("action_proposal", model, decisionIssue(fallback, p) ? { action: { kind: "wait" }, remember: [] } : fallback);
   }
   async converse(ctx: ConverseContext): Promise<Dialogue> {
     const { model, slot } = this.pick("dialogue", ctx.a);
@@ -99,13 +110,13 @@ export class OpenRouterBrain implements Brain {
     const quiet = ctx.agent.budget?.reflectionIncluded !== true && (ctx as { quiet?: boolean }).quiet === true;
     const { model, slot } = this.pick("reflection", ctx.agent, quiet ? "stakes" : "reflect");
     const { system, user } = buildReflectContext(ctx);
-    const out = await this.call("reflection", model, slot, system, user, Reflection, quiet ? 900 : 2000, ctx.agent.id);
+    const out = await this.call("reflection", model, slot, system, user, Reflection, quiet ? 900 : 2000, ctx.agent.id, reflectionIssue);
     return out ?? this.stood("reflection", model, await this.fallback.reflect(ctx));
   }
   async plan(ctx: PlanContext, tier: Tier): Promise<DayPlan> {
     const { model, slot } = this.pick("day_plan", ctx.agent, tier >= 2 ? "stakes" : "routine");
     const { system, user } = buildPlanContext(ctx);
-    const out = await this.call("day_plan", model, slot, system, user, DayPlan, 1200, ctx.agent.id);
+    const out = await this.call("day_plan", model, slot, system, user, DayPlan, 1200, ctx.agent.id, value => planIssue(value, ctx));
     return out ?? this.stood("day_plan", model, await this.fallback.plan(ctx, tier));
   }
   /** The depth a person has beyond the sheet, written once by the strongest mind and kept with them. */
@@ -121,6 +132,7 @@ export class OpenRouterBrain implements Brain {
     return out ?? this.stood("child", model, await this.fallback.child(ctx));
   }
   async writePaper(ctx: PaperContext): Promise<Paper> {
+    ctx = publicPaperContext(ctx);
     const { model, slot } = this.pick("paper", null);
     const out = await this.call("paper", model, slot, { shared: paperSystem }, paperPrompt(ctx), Paper, 3000);
     return out ?? this.stood("paper", model, await this.fallback.writePaper(ctx));

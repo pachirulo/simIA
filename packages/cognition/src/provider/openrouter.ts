@@ -1,8 +1,13 @@
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 import type { CallKind, Slot } from "../model/router.ts";
 import type { SystemContext } from "../context/shared.ts";
 import { cleanSchema, strictSchema, stripNulls, wantsStrict } from "../schema/json.ts";
+import { compactActionSchema } from "../schema/compact.ts";
+import { normalizeOptionalStrings } from "../schema/normalize.ts";
 import { truncateProse, repairNote } from "./response.ts";
+import { outputQualityIssue, semanticRepairNote, type OutputCheck } from "../semantics/quality.ts";
+import { OpenRouterLogger, safeLog, type CallTrace, type OpenRouterLoggingOptions } from "./logging.ts";
 
 export interface ProviderUsage { agentId: string | null; kind: CallKind; model: string; promptTokens: number; completionTokens: number; cachedTokens: number; costUsd: number | null; reasoningTokens?: number; finishReason?: string | null; provider?: string | null; generationId?: string | null; }
 
@@ -13,7 +18,7 @@ interface ProviderResponse {
   usage?: { cost?: number; prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number }; completion_tokens_details?: { reasoning_tokens?: number } };
 }
 
-export interface ProviderOptions {
+export interface ProviderOptions extends OpenRouterLoggingOptions {
   apiKey: string;
   timeoutMs?: number;
   reflectTimeoutMs?: number;
@@ -38,6 +43,7 @@ export class OpenRouterProvider {
   private providerCost: number | null = 0;
   private spent = { calls: 0, prompt: 0, completion: 0 };
   private cached = 0;
+  private readonly diagnostics: OpenRouterLogger;
   onUsage: ((usage: ProviderUsage) => void) | null = null;
   onFallback: ((f: { what: string; model: string; reason: string }) => void) | null = null;
 
@@ -45,17 +51,22 @@ export class OpenRouterProvider {
     this.key = o.apiKey;
     this.timeoutMs = o.timeoutMs ?? envMs("UW_OR_TIMEOUT_MS", 45_000);
     this.reflectTimeoutMs = o.reflectTimeoutMs ?? envMs("UW_OR_TIMEOUT_REFLECT_MS", 90_000);
-    this.log = o.log ?? (() => {});
+    this.log = safeLog(o.log);
+    this.diagnostics = new OpenRouterLogger(o.apiKey, o.log, o);
   }
   usage() { return { ...this.spent, costUsd: this.providerCost }; }
   cachedTokens() { return this.cached; }
+  flushLogs() { return this.diagnostics.flush(); }
 
-  private async post(body: unknown, model: string, name: CallKind, slot: Slot, agentId: string | null): Promise<{ text: string; finishReason: string | null } | null> {
+  private async post(body: unknown, model: string, name: CallKind, slot: Slot, agentId: string | null, callTrace: CallTrace, responseAttempt: number): Promise<{ text: string; finishReason: string | null; id: string | null } | null> {
     if (Date.now() < this.blockedUntil) throw new Error("Provider unavailable; retry after cooldown");
     const ms = slot === "reflect" ? this.reflectTimeoutMs : this.timeoutMs;
     for (let attempt = 0; attempt < 2; attempt++) {
       if (Date.now() < this.blockedUntil) throw new Error("Provider unavailable; retry after cooldown");
       // the whole attempt is inside the try: the deadline aborts the body as well as the headers, so an answer that arrives half-read must fall back like any other
+      const trace = { ...callTrace, attempt: responseAttempt, httpAttempt: attempt + 1 };
+      const started = performance.now();
+      this.diagnostics.emit("request", trace, this.diagnostics.content ? { body } : {});
       try {
         const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
@@ -63,32 +74,44 @@ export class OpenRouterProvider {
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(ms),
         });
+        if (!res.ok) this.diagnostics.emit("http_error", trace, { status: res.status, durationMs: Math.round(performance.now() - started), id: res.headers.get("x-generation-id") });
         if (res.status === 429 || res.status >= 500) { this.log(`openrouter ${res.status}; ${attempt === 0 ? "retrying" : "falling back"}`); if (attempt === 1) { this.onFallback?.({ what: name, model, reason: `openrouter ${res.status}` }); return null; } await new Promise((r) => setTimeout(r, 1500)); continue; }
         if (!res.ok) { const msg = (await res.text()).slice(0, 600); if ([401, 402, 403].includes(res.status)) this.blockedUntil = Date.now() + (/daily limit/i.test(msg)?3600000:300000); this.log(`openrouter ${res.status}: ${msg}`); this.onFallback?.({ what: name, model, reason: `openrouter ${res.status}` }); return null; }
         const data = await res.json() as ProviderResponse;
+        const id = data.id ?? res.headers.get("x-generation-id");
         const finishReason = data.choices?.[0]?.finish_reason ?? null;
         if (typeof data.usage?.cost === "number" && this.providerCost !== null) this.providerCost += data.usage.cost; else this.providerCost = null;
-        try { this.onUsage?.({agentId,kind:name,model,promptTokens:data.usage?.prompt_tokens??0,completionTokens:data.usage?.completion_tokens??0,cachedTokens:data.usage?.prompt_tokens_details?.cached_tokens??0,costUsd:typeof data.usage?.cost === "number" ? data.usage.cost : null, reasoningTokens:data.usage?.completion_tokens_details?.reasoning_tokens??0, finishReason, provider:data.provider??null, generationId:data.id??null}); } catch { this.log("Provider usage reporting failed"); }
+        try { this.onUsage?.({agentId,kind:name,model,promptTokens:data.usage?.prompt_tokens??0,completionTokens:data.usage?.completion_tokens??0,cachedTokens:data.usage?.prompt_tokens_details?.cached_tokens??0,costUsd:typeof data.usage?.cost === "number" ? data.usage.cost : null, reasoningTokens:data.usage?.completion_tokens_details?.reasoning_tokens??0, finishReason, provider:data.provider??null, generationId:id}); } catch { this.log("Provider usage reporting failed"); }
         this.spent.calls++; this.spent.prompt += data.usage?.prompt_tokens ?? 0; this.spent.completion += data.usage?.completion_tokens ?? 0; this.cached += data.usage?.prompt_tokens_details?.cached_tokens ?? 0;
-        this.log(`openrouter response ${JSON.stringify({ kind: name, model, id: data.id, provider: data.provider, finishReason, prompt: data.usage?.prompt_tokens, completion: data.usage?.completion_tokens, reasoning: data.usage?.completion_tokens_details?.reasoning_tokens, cached: data.usage?.prompt_tokens_details?.cached_tokens, costUsd: data.usage?.cost })}`);
+        this.diagnostics.emit("response", trace, { id, provider: data.provider ?? null, finishReason,
+          durationMs: Math.round(performance.now() - started), prompt: data.usage?.prompt_tokens ?? null,
+          completion: data.usage?.completion_tokens ?? null, reasoning: data.usage?.completion_tokens_details?.reasoning_tokens ?? null,
+          cached: data.usage?.prompt_tokens_details?.cached_tokens ?? null, costUsd: data.usage?.cost ?? null,
+          usage: data.usage ?? null, error: data.error ?? null,
+          ...(this.diagnostics.content ? { response: data } : {}),
+        });
+        this.diagnostics.enrich(trace, id);
         if (data.error || (finishReason !== null && !["stop", "length"].includes(finishReason))) {
           const reason = data.error ? `provider error ${data.error.code ?? "unknown"}` : `finish_reason=${finishReason}`;
           this.log(`openrouter ${name}: ${reason}`);
           this.onFallback?.({ what: name, model, reason }); return null;
         }
-        return { text: typeof data.choices?.[0]?.message?.content === "string" ? data.choices[0].message.content : "", finishReason };
+        return { text: typeof data.choices?.[0]?.message?.content === "string" ? data.choices[0].message.content : "", finishReason, id };
       } catch (err) {
         const why = (err as Error).name === "TimeoutError" || (err as Error).name === "AbortError" ? `no answer in ${Math.round(ms / 1000)}s` : `no usable answer: ${(err as Error).message}`;
+        this.diagnostics.emit("transport_error", trace, { durationMs: Math.round(performance.now() - started), reason: why });
         this.log(`openrouter ${why}; not replaying an uncertain request`); this.onFallback?.({ what: name, model, reason: why }); return null;
       }
     }
     return null;
   }
 
-  async call<T>(name: CallKind, model: string, slot: Slot, system: SystemContext, user: string, schema: z.ZodType<T>, maxTokens: number, agentId: string | null = null): Promise<T | null> {
+  async call<T>(name: CallKind, model: string, slot: Slot, system: SystemContext, user: string, schema: z.ZodType<T>, maxTokens: number, agentId: string | null = null, check?: OutputCheck<T>): Promise<T | null> {
     // Providers behind OpenRouter accept a subset of JSON Schema: no regex patterns, no defaults, anyOf not oneOf.
     // Send the schema once, as a strict response format. Duplicating it in system is costly.
-    const jsonSchema = wantsStrict(model) ? strictSchema(cleanSchema(z.toJSONSchema(schema))) : cleanSchema(z.toJSONSchema(schema));
+    const canonical = cleanSchema(z.toJSONSchema(schema));
+    const wireSchema = name === "action_proposal" ? compactActionSchema(canonical, wantsStrict(model)) : canonical;
+    const jsonSchema = wantsStrict(model) ? strictSchema(wireSchema) : wireSchema;
     const messages = buildMessages(system, user);
     // V4 Flash enables high reasoning by default. These existing operation budgets
     // are for the final JSON, not an unbounded thinking phase. Other models retain their policy.
@@ -97,9 +120,12 @@ export class OpenRouterProvider {
       ...(disableReasoning ? { reasoning: { enabled: false } } : {}),
       provider: { require_parameters: true },
       response_format: { type: "json_schema", json_schema: { name, strict: true, schema: jsonSchema } } };
+    const trace: CallTrace = { callId: randomUUID(), agentId, kind: name, model, slot };
     for (let attempt = 0; attempt < 2; attempt++) {
-      const got = await this.post(body, model, name, slot, agentId); if (!got) return null;
+      const got = await this.post(body, model, name, slot, agentId, trace, attempt + 1); if (!got) return null;
+      const validation = (status: string, details: Record<string, unknown> = {}) => this.diagnostics.emit("validation", trace, { id: got.id, attempt: attempt + 1, status, ...details });
       if (got.finishReason === "length") {
+        validation("truncated", { willRetry: attempt === 0 });
         this.log(`openrouter ${name} (${model}): truncated at max_tokens=${body.max_tokens}; ${attempt === 0 ? "retrying once with double budget" : "giving up"}`);
         if (attempt === 1) { this.onFallback?.({ what: name, model, reason: "finish_reason=length" }); return null; }
         body.max_tokens = maxTokens * 2;
@@ -108,11 +134,20 @@ export class OpenRouterProvider {
       const text = got.text;
       let raw: unknown;
       try { raw = JSON.parse(text.trim().replace(/^```json\s*|```$/g, "")); }
-      catch { this.log(`not json from ${model}: ${text.slice(0, 80)}`); if (attempt === 1) { this.onFallback?.({ what: name, model, reason: text.trim() ? "not json" : "no answer" }); return null; } if (text.trim()) messages.push({ role: "assistant", content: text }, { role: "user", content: "That was not a single JSON object. Return the same answer as JSON only, matching the schema." }); continue; } // an empty turn is refused by the providers, so an answer with nothing in it is simply asked again
-      const parsed = schema.safeParse(truncateProse(name, wantsStrict(model) ? stripNulls(raw) : raw));
-      if (parsed.success) return parsed.data;
+      catch { validation("not_json", { willRetry: attempt === 0 }); this.log(`not json from ${model}${this.diagnostics.content ? `: ${text.slice(0, 80)}` : ""}`); if (attempt === 1) { this.onFallback?.({ what: name, model, reason: text.trim() ? "not json" : "no answer" }); return null; } if (text.trim()) messages.push({ role: "assistant", content: text }, { role: "user", content: "That was not a single JSON object. Return the same answer as JSON only, matching the schema." }); continue; } // an empty turn is refused by the providers, so an answer with nothing in it is simply asked again
+      const parsed = schema.safeParse(truncateProse(name, normalizeOptionalStrings(wantsStrict(model) ? stripNulls(raw) : raw, schema)));
+      if (parsed.success) {
+        const semantic = outputQualityIssue(parsed.data) ?? check?.(parsed.data);
+        if (!semantic) { validation("accepted", { value: parsed.data }); return parsed.data; }
+        validation("semantic_mismatch", { issue: semantic, willRetry: attempt === 0 });
+        this.log(`semantic mismatch from ${model}: ${semantic.code} at ${semantic.path}`);
+        if (attempt === 1) { this.onFallback?.({ what: name, model, reason: `semantic: ${semantic.code}` }); return null; }
+        messages.push({ role: "user", content: semanticRepairNote(semantic) });
+        continue;
+      }
       const issue = parsed.error.issues[0];
-      this.log(`schema mismatch from ${model}: ${issue?.message ?? "?"} at ${issue?.path.join(".") || "root"}; got ${text.slice(0, 160)}`);
+      validation("schema_mismatch", { issue, willRetry: attempt === 0 });
+      this.log(`schema mismatch from ${model}: ${issue?.message ?? "?"} at ${issue?.path.join(".") || "root"}${this.diagnostics.content ? `; got ${text.slice(0, 160)}` : ""}`);
       if (attempt === 1 || !issue) { this.onFallback?.({ what: name, model, reason: `schema: ${issue?.message ?? "?"}` }); return null; }
       // the repair: the model sees its own answer and the one thing wrong with it, and gives the same answer inside the limits
       messages.push({ role: "assistant", content: text }, { role: "user", content: repairNote(issue as Parameters<typeof repairNote>[0], raw) });

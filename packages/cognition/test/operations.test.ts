@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ActionProposal, DayPlan, Dialogue, Reflection } from "@unwatched/protocol";
 import { OpenRouterBrain, isFromFallback, type CallKind, type ProviderUsage } from "../src/index.ts";
 import { cleanSchema, strictSchema, stripNulls, wantsStrict } from "../src/schema/json.ts";
+import { compactActionSchema } from "../src/schema/compact.ts";
 import { contexts, persona } from "./fixtures.ts";
 
 interface Block { type: string; text: string; cache_control?: { type: string } }
@@ -57,7 +58,8 @@ describe("OpenRouter operation contracts", () => {
     bodies.forEach((body, i) => {
       expect(body.response_format.type).toBe("json_schema");
       expect(body.response_format.json_schema.strict).toBe(true);
-      expect(body.response_format.json_schema.schema).toEqual(cleanSchema(z.toJSONSchema(schemas[i]!)));
+      const canonical = cleanSchema(z.toJSONSchema(schemas[i]!));
+      expect(body.response_format.json_schema.schema).toEqual(i === 0 ? compactActionSchema(canonical) : canonical);
       const blocks = body.messages[0]!.content as Block[];
       expect(blocks[0]!.text).toContain(c.primer);
       expect(blocks[0]!.text).not.toContain(JSON.stringify(body.response_format.json_schema.schema));
@@ -136,7 +138,7 @@ describe("OpenRouter operation contracts", () => {
     const { bodies } = provider(() => ({ action: { kind: "say", to: null, text: "Hola." }, desire_id: null, intent: null, remember: [] }));
     const c = contexts(); const brain = new OpenRouterBrain({ apiKey: "test", routine: "openai/test" });
     expect(await brain.decide(c.perception, c.a, 1)).toEqual({ action: { kind: "say", text: "Hola." }, remember: [] });
-    expect(bodies[0]!.response_format.json_schema.schema).toEqual(strictSchema(cleanSchema(z.toJSONSchema(ActionProposal))));
+    expect(bodies[0]!.response_format.json_schema.schema).toEqual(strictSchema(compactActionSchema(cleanSchema(z.toJSONSchema(ActionProposal)), true)));
     expect(wantsStrict("~openai/test")).toBe(true); expect(wantsStrict("anthropic/test")).toBe(false);
     const schema = strictSchema(cleanSchema({ type: "object", properties: { a: { type: "string", pattern: "x", maxLength: 3, default: "x" } }, required: [], $schema: "x", oneOf: [] }));
     expect(schema).toEqual({ type: "object", properties: { a: { anyOf: [{ type: "string" }, { type: "null" }] } }, required: ["a"], additionalProperties: false, anyOf: [] });

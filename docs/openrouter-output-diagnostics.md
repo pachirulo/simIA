@@ -1,5 +1,8 @@
 # OpenRouter: salida vacía o truncada
 
+Para ver mensajes, schema, respuesta cruda y metadata de cada generación en la
+consola, consultar [Logs completos de OpenRouter](openrouter-console-logs.md).
+
 ## Diagnóstico y recorrido del código
 
 `packages/cognition/src/openrouter.ts` elige modelo/tier y construye contextos separados de decide, converse, plan y reflect. `provider/openrouter.ts`, método `call`, convierte el schema Zod y arma el body. Su método `post` envía `POST https://openrouter.ai/api/v1/chat/completions` con timeout de 45 s para routine/stakes y 90 s para reflect (variables `UW_OR_TIMEOUT_MS` y `UW_OR_TIMEOUT_REFLECT_MS`).
@@ -19,7 +22,7 @@ La selección usa `UW_OR_MODEL_ROUTINE`, `UW_OR_MODEL_STAKES` y `UW_OR_MODEL_REF
 | judge / judgement | routine | 400 |
 | life | reflect | 3200 |
 
-El schema va tanto en el system prompt como en `response_format: {type: "json_schema", json_schema: {name, strict: true, schema}}`. `cleanSchema` elimina pattern/default/$schema y convierte oneOf a anyOf. Sólo los modelos OpenAI usan además `strictSchema` y normalización de nulls. Los demás conservan su schema actual; la validación final siempre usa Zod.
+El schema va una sola vez en `response_format: {type: "json_schema", json_schema: {name, strict: true, schema}}`; el system remite al schema suministrado. `cleanSchema` elimina pattern/default/$schema y convierte oneOf a anyOf; ActionProposal usa su representación compacta de transporte. Sólo los modelos OpenAI usan además `strictSchema` y normalización de nulls. Los opcionales de texto vacíos se normalizan en cognition; la validación final siempre usa el schema Zod canónico.
 
 `post` extrae exclusivamente `choices[0].message.content`; los campos de reasoning no son la respuesta JSON. `call` quita fences JSON, usa `JSON.parse`, aplica límites de prosa y `schema.safeParse`. El log exacto `not json from ...` nace en el catch de `JSON.parse` dentro de `OpenRouterProvider.call`.
 
