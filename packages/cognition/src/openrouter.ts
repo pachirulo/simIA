@@ -1,8 +1,12 @@
 import { publicPaperContext } from "./context/paper.ts";
 import { actionProposalSchema } from "./schema/action.ts";
+import { CognitiveDayPlan } from "./schema/plan.ts";
+import { reflectionSchema } from "./schema/reflection.ts";
 import { buildDecideContext } from "./context/decide.ts";
+import { decisionEvidence } from "./context/decision-evidence.ts";
+import { DecisionContinuity } from "./context/continuity.ts";
 import { buildPlanContext } from "./context/plan.ts";
-import { buildConverseContext } from "./context/converse.ts";
+import { buildConverseContext, publicDialogueFallback } from "./context/converse.ts";
 import { buildReflectContext } from "./context/reflect.ts";
 import { OpenRouterProvider, type ProviderUsage } from "./provider/openrouter.ts";
 import { safeLog, type OpenRouterLoggingOptions } from "./provider/logging.ts";
@@ -11,6 +15,7 @@ import { markFallback } from "./provider/response.ts";
 import { withPrimer, type SystemContext } from "./context/shared.ts";
 import { decisionIssue } from "./semantics/decision.ts";
 import { planIssue, reflectionIssue } from "./semantics/lifecycle.ts";
+import { dialogueIssue, canonicalDialogue } from "./semantics/dialogue.ts";
 import type { OutputCheck } from "./semantics/quality.ts";
 export { chooseModel, SLOT_OF } from "./model/router.ts";
 export type { CallKind, Slot, Models } from "./model/router.ts";
@@ -20,6 +25,7 @@ import type { z } from "zod";
 import { ActionProposal, Dialogue, Paper, Reflection, type Perception, DayPlan, DigestText, Persona, LifeText, Judgement, PersonaDepth } from "@unwatched/protocol";
 import type { AgentState, Brain, ConverseContext, PaperContext, ReflectContext, Tier, PlanContext, DigestContext, ChildContext, LifeContext, JudgeContext } from "@unwatched/engine";
 import { MockBrain } from "./mock.ts";
+import { conservativeDecisionFallback, conservativeReflectionFallback } from "./fallbacks.ts";
 import { paperSystem, paperPrompt, lifeSystem, lifePrompt, judgeSystem, judgePrompt, digestSystem, digestPrompt, childSystem, childPrompt, depthSystem, depthPrompt } from "./prompts.ts";
 
 export interface OpenRouterBrainOptions extends OpenRouterLoggingOptions {
@@ -49,6 +55,7 @@ export class OpenRouterBrain implements Brain {
   private models: Models;
   private log: (l: string) => void;
   private fallback = new MockBrain(13);
+  private continuity = new DecisionContinuity();
   constructor(o: OpenRouterBrainOptions = {}) {
     const key = o.apiKey ?? process.env.OPENROUTER_API_KEY;
     if (!key) throw new Error("OPENROUTER_API_KEY is not set");
@@ -90,33 +97,31 @@ export class OpenRouterBrain implements Brain {
   }
 
   async decide(p: Perception, a: AgentState, tier: Tier): Promise<ActionProposal> {
+    p = decisionEvidence(p, a);
     const { model, slot } = this.pick("action_proposal", a, tier >= 2 ? "stakes" : "routine");
-    const { system, user } = buildDecideContext(p, a);
-    const out = await this.call("action_proposal", model, slot, system, user, actionProposalSchema(p), 1024, a.id, value => decisionIssue(value, p));
-    if (out) return out;
-    const fallback = await this.fallback.decide(p, a, tier);
-    // Synthetic fallback must not bypass the same semantic boundary or store a
-    // pre-execution claim. Preserve the existing marked fallback/strict-mode policy.
-    return this.stood("action_proposal", model, decisionIssue(fallback, p) ? { action: { kind: "wait" }, remember: [] } : fallback);
+    const { system, user } = buildDecideContext(p, a, this.continuity.describe(a, p));
+    const out = await this.call("action_proposal", model, slot, system, user, actionProposalSchema(p), 1024, a.id, value => decisionIssue(value, p, a.persona.name));
+    if (out) { this.continuity.record(a, p, out); return out; }
+    return this.stood("action_proposal", model, conservativeDecisionFallback());
   }
   async converse(ctx: ConverseContext): Promise<Dialogue> {
     const { model, slot } = this.pick("dialogue", ctx.a);
     const { system, user } = buildConverseContext(ctx);
-    const out = await this.call("dialogue", model, slot, system, user, Dialogue, 1500, ctx.a.id);
-    return out ?? this.stood("dialogue", model, await this.fallback.converse(ctx));
+    const out = await this.call("dialogue", model, slot, system, user, Dialogue, 1500, ctx.a.id, value => dialogueIssue(value, ctx));
+    return canonicalDialogue(out ?? this.stood("dialogue", model, publicDialogueFallback(ctx)), ctx);
   }
   async reflect(ctx: ReflectContext): Promise<Reflection> {
     // a quiet night (nothing of importance happened, says the engine) is thought through on the middle mind, briefly; the prompt is the same
     const quiet = ctx.agent.budget?.reflectionIncluded !== true && (ctx as { quiet?: boolean }).quiet === true;
     const { model, slot } = this.pick("reflection", ctx.agent, quiet ? "stakes" : "reflect");
     const { system, user } = buildReflectContext(ctx);
-    const out = await this.call("reflection", model, slot, system, user, Reflection, quiet ? 900 : 2000, ctx.agent.id, reflectionIssue);
-    return out ?? this.stood("reflection", model, await this.fallback.reflect(ctx));
+    const out = await this.call("reflection", model, slot, system, user, reflectionSchema(ctx), quiet ? 900 : 2000, ctx.agent.id, value => reflectionIssue(value, ctx));
+    return out ?? this.stood("reflection", model, conservativeReflectionFallback());
   }
   async plan(ctx: PlanContext, tier: Tier): Promise<DayPlan> {
     const { model, slot } = this.pick("day_plan", ctx.agent, tier >= 2 ? "stakes" : "routine");
     const { system, user } = buildPlanContext(ctx);
-    const out = await this.call("day_plan", model, slot, system, user, DayPlan, 1200, ctx.agent.id, value => planIssue(value, ctx));
+    const out = await this.call("day_plan", model, slot, system, user, CognitiveDayPlan, 1200, ctx.agent.id, value => planIssue(value, ctx));
     return out ?? this.stood("day_plan", model, await this.fallback.plan(ctx, tier));
   }
   /** The depth a person has beyond the sheet, written once by the strongest mind and kept with them. */

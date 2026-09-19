@@ -17,7 +17,7 @@ export function decideRules(p: Perception): string {
   const urgent = urgentNeeds(p);
   return [
     urgent.length > 0 && `- Urgent now: ${urgent.join(", ")}. Check an immediate remedy before optional activity; a skill or plan does not execute its steps.`,
-    has("trade") && '- trade: buy/sell name items; sell must be carried. Omit with for this shop; with identifies a person/place, never the item. Buying adds inventory; use eats later.',
+    has("trade") && '- trade: buy adds the named item; sell removes a carried item for coins, NOT another item. Neither eats; use consumes carried food separately. Omit with for this shop. with can only be the current place ID or a present person; never a job ID, an invented keeper/stall or a remote shop. Intent must describe this immediate effect, not a later imagined meal.',
     has("work", "apply") && (p.place.site || p.place.community
       ? "- Site/garden work has its own prerequisites; it is not a wage shift or guaranteed income."
       : `- Wage work needs an assigned job, its place and shift hours, never Sunday. apply requests employment; vacancies are not jobs you hold.${work ? ` Now: ${work.message}` : ""}`),

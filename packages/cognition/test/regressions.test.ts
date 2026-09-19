@@ -43,7 +43,7 @@ describe("17 September API regression replay", () => {
   });
 
   it("normalizes only optional strings before validation, including nested skill steps", () => {
-    const input = { action: { kind: "propose_skill", recipe: { name: "Comer", goal: "eat", steps: [{ kind: "trade", buy: "bread", sell: "  " }, { kind: "use", item: "bread" }] } }, intent: "", remember: [] };
+    const input = { action: { kind: "propose_skill", recipe: { name: "Eat", goal: "eat", steps: [{ kind: "trade", buy: "bread", sell: "  " }, { kind: "use", item: "bread" }] } }, intent: "", remember: [] };
     const out = ActionProposal.parse(normalizeOptionalStrings(input, ActionProposal));
     expect(out).not.toHaveProperty("intent");
     expect(out.action.kind === "propose_skill" && out.action.recipe.steps[0]).toEqual({ kind: "trade", buy: "bread" });
@@ -119,9 +119,9 @@ describe("public newspaper boundary", () => {
       { text: "Inés would now say of themself: PRIVATE THOUGHT; with strangers is now cautious", importance: .8, actors: ["ag_1"] },
       { text: "Inés wrote to owner: “PRIVATE LETTER”", importance: .8, actors: ["ag_1"] },
       { text: "Inés reflected: PRIVATE REFLECTION", importance: .2, actors: ["ag_1"] },
-      { text: "Inés and Pedro talked at the market: “Dicen que el molino busca gente.”", importance: .4, actors: ["ag_1", "ag_2"] },
+      { text: "Inés and Pedro talked at the market: “They say the mill is hiring.”", importance: .4, actors: ["ag_1", "ag_2"] },
       { text: 'Inés said: "Pedro now wants a home."', importance: .4, actors: ["ag_1"] },
-      { text: 'Inés to Pedro: “Tengo un horno.”', importance: .4, actors: ["Inés", "Pedro"] },
+      { text: 'Inés to Pedro: “I have an oven.”', importance: .4, actors: ["Inés", "Pedro"] },
       { text: "Pedro bought bread for 1.", importance: .3, actors: ["ag_2"] },
     ] });
 

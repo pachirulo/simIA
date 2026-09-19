@@ -1,0 +1,1427 @@
+{
+  "source": "apps/headless/out/openrouter-deepseek-Monchi; seed 42, 3 agents, day 1, tick 60; original generation/content captures",
+  "method": "Outputs and selected evidence texts extracted from original requests. Event IDs joined to the saved world events for time/actors metadata only; no unselected events added. Other AgentState fields in test contexts are reconstructed, not an exact state replay.",
+  "fixtures": [
+    {
+      "agentId": "ag_1",
+      "name": "Rosa Vidal",
+      "day": 1,
+      "coins": 36,
+      "home": {
+        "place": "inn",
+        "nightsPaid": 1
+      },
+      "dayMemories": [
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 600; recorded observation; quoted claims remain claims] I got work as help at the inn. 2 coins a shift.",
+        "[minute 720; reported speech, not verified experience] Conversation at the harbor inn: Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I heard the mill's been slow with the damp. Grain gets heavy.” Ivana Horvat: “Could be. I don't follow that trade. You'd know better than I would.”",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the harbor (harbor): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 480; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 360; intention, not completed work] What I meant to do today: Find work and a routine that keeps me fed and rested; Meet people and learn who runs what; Start keeping an eye on the inn and the town's doings",
+        "[minute 540; recorded observation; quoted claims remain claims] I said to Ivana Horvat: \"Morning, Ivana. Rough weather out there. What's the word around town these days?\"",
+        "[minute 780; recorded observation; quoted claims remain claims] I said to Ivana Horvat: \"It's Sunday, so no shifts today, but my shift at the inn starts tomorrow at eight. You still planning to keep the inn as your base?\"",
+        "[minute 840; recorded observation; quoted claims remain claims] I said to Ivana Horvat: \"It's still pouring. I'm mayor now, and I'd rather hear what folks really need than sit on that. You know anyone struggling with the damp or the mill?\""
+      ],
+      "keyMemories": [
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 720; reported speech, not verified experience] Conversation at the harbor inn: Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I heard the mill's been slow with the damp. Grain gets heavy.” Ivana Horvat: “Could be. I don't follow that trade. You'd know better than I would.”",
+        "[minute 600; recorded observation; quoted claims remain claims] I got work as help at the inn. 2 coins a shift.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 480; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the harbor (harbor): no active damage recorded; no construction site. This does not reveal unmodeled structural details."
+      ],
+      "actionEvidence": [
+        "[event 29, minute 600, agent.hired] Rosa Vidal was taken on as help at the inn.",
+        "[event 33, minute 660, agent.trade] Rosa Vidal bought soup for 2.",
+        "[event 62, minute 1140, agent.trade] Rosa Vidal bought soup for 2."
+      ],
+      "desireEvidence": [
+        {
+          "id": 1,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.arrive",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal arrived on the boat.",
+          "importance": 0.5,
+          "place": "harbor"
+        },
+        {
+          "id": 6,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.plan",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal set out to find work and a routine that keeps me fed and rested",
+          "importance": 0.15,
+          "place": "harbor",
+          "payload": {
+            "goals": [
+              "Find work and a routine that keeps me fed and rested",
+              "Meet people and learn who runs what",
+              "Start keeping an eye on the inn and the town's doings"
+            ],
+            "mood": "Wet and restless, wanting to find a place in town again."
+          }
+        },
+        {
+          "id": 10,
+          "t": 420,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "Walking from the harbor to the inn to see who's about on this Sunday morning."
+          }
+        },
+        {
+          "id": 16,
+          "t": 480,
+          "day": 1,
+          "kind": "agent.sleep",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal went to sleep at the harbor inn.",
+          "importance": 0.01,
+          "place": "inn",
+          "payload": {
+            "because": "Resting here at the inn to recover from the wet morning and the earlier walking."
+          }
+        },
+        {
+          "id": 20,
+          "t": 540,
+          "day": 1,
+          "kind": "agent.wake",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal woke up.",
+          "importance": 0.01,
+          "place": "inn"
+        },
+        {
+          "id": 21,
+          "t": 540,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “Morning, Ivana. Rough weather out there. What's the word around town these days?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Greet Ivana and ask for local news and gossip while I'm here at the inn."
+          }
+        },
+        {
+          "id": 25,
+          "t": 600,
+          "day": 1,
+          "kind": "town.mayor",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "The council chose Rosa Vidal as mayor: the person the island trusts most.",
+          "importance": 0.8,
+          "place": "council"
+        },
+        {
+          "id": 26,
+          "t": 600,
+          "day": 1,
+          "kind": "town.gathering",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "The council sat at the council hall in front of 0; Rosa Vidal is mayor.",
+          "importance": 0.9,
+          "place": "council",
+          "payload": {
+            "kind": "election",
+            "crowd": [],
+            "held": true
+          }
+        },
+        {
+          "id": 29,
+          "t": 600,
+          "day": 1,
+          "kind": "agent.hired",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal was taken on as help at the inn.",
+          "importance": 0.5,
+          "place": "inn",
+          "payload": {
+            "because": "find honest work"
+          }
+        },
+        {
+          "id": 33,
+          "t": 660,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal bought soup for 2.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "Buy a bowl of soup to eat now and ease my hunger."
+          }
+        },
+        {
+          "id": 35,
+          "t": 720,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal ate soup.",
+          "importance": 0.01,
+          "place": "inn"
+        },
+        {
+          "id": 38,
+          "t": 720,
+          "day": 1,
+          "kind": "conversation",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal and Ivana Horvat talked at the harbor inn. Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I ",
+          "importance": 0.67,
+          "place": "inn",
+          "payload": {
+            "lines": [
+              {
+                "speaker": "ag_1",
+                "text": "Rain's coming down hard again. You here for the soup or the company?"
+              },
+              {
+                "speaker": "ag_3",
+                "text": "Soup, mostly. The bread they serve here turns to paste in this weather."
+              },
+              {
+                "speaker": "ag_1",
+                "text": "I heard the mill's been slow with the damp. Grain gets heavy."
+              },
+              {
+                "speaker": "ag_3",
+                "text": "Could be. I don't follow that trade. You'd know better than I would."
+              }
+            ]
+          }
+        },
+        {
+          "id": 41,
+          "t": 780,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “It's Sunday, so no shifts today, but my shift at the inn starts tomorrow at eight. You still planning to keep the inn as your base?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Keep talking with Ivana to stay in the loop, and see if she's thinking of lodging here."
+          }
+        },
+        {
+          "id": 44,
+          "t": 840,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “It's still pouring. I'm mayor now, and I'd rather hear what folks really need than sit on that. You know anyone struggling with the damp or the mill?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Staying in conversation with Ivana to gather town news and fulfill my goal of learning who runs what."
+          }
+        },
+        {
+          "id": 55,
+          "t": 1020,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal went to the market square.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 58,
+          "t": 1080,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn"
+        },
+        {
+          "id": 62,
+          "t": 1140,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal bought soup for 2.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "Buying a bowl of soup here at the inn to ease my hunger this evening."
+          }
+        },
+        {
+          "id": 64,
+          "t": 1200,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal ate soup.",
+          "importance": 0.01,
+          "place": "inn"
+        },
+        {
+          "id": 66,
+          "t": 1260,
+          "day": 1,
+          "kind": "agent.sleep",
+          "actors": [
+            "ag_1"
+          ],
+          "text": "Rosa Vidal went to sleep at the harbor inn.",
+          "importance": 0.01,
+          "place": "inn"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "gen-1789756898-tqDyYj305sqFkY1yIxsO",
+          "attempt": 1,
+          "output": {
+            "beliefs": [
+              {
+                "about": "the island",
+                "belief": "The damp is slowing the mill and making everyone heavy and slow.",
+                "confidence": 0.6
+              },
+              {
+                "about": "Ivana Horvat",
+                "belief": "Ivana knows the town but keeps herself out of trade details; she trusts me enough to talk.",
+                "confidence": 0.5
+              },
+              {
+                "about": "the town",
+                "belief": "The council chose me mayor, so people must think I'm trustworthy even if I just arrived.",
+                "confidence": 0.8
+              }
+            ],
+            "desires": [
+              {
+                "evidence": [
+                  6,
+                  29
+                ],
+                "id": "job_routine",
+                "state": "active",
+                "title": "Find work and a routine that keeps me fed and rested",
+                "why": "I got the inn job and paid nights, but I need to keep it steady so I don't end up hungry or sleeping rough."
+              },
+              {
+                "evidence": [
+                  21,
+                  38,
+                  44
+                ],
+                "id": "know_town",
+                "state": "active",
+                "title": "Meet people and learn who runs what",
+                "why": "As mayor and as innkeeper, I need to know the town's real needs and who to talk to about them."
+              }
+            ],
+            "insights": [
+              "Being mayor doesn't mean I know the town yet. I've only spoken properly with Ivana, and I still don't know who runs the bakery, smithy or chandlery.",
+              "The inn job is a start, but 2 coins a shift barely covers soup. I'll need to watch my coins carefully.",
+              "The rain has everyone talking about the mill being slow. That might be where people are struggling most."
+            ],
+            "intentions": [
+              "Show up for my first shift at the inn at eight and do the work well.",
+              "Ask around the inn who's dealing with the damp or the mill's slowness, so I can learn what the town actually needs.",
+              "Walk by the chandlery and the bakery in my free time to see who's there and what they might need."
+            ],
+            "letter_to_owner": null,
+            "opinions": [
+              {
+                "about": "Ivana Horvat",
+                "opinion": "She's got her head about her, asks direct questions, doesn't pretend to know trades she doesn't. I like that, but I'm still learning how much she actually tells me.",
+                "trust_delta": 0.1
+              },
+              {
+                "about": "Petar Ilić",
+                "opinion": "Haven't actually spoken to him yet. He's just a name at the bakery so far. No strong opinion.",
+                "trust_delta": 0
+              }
+            ],
+            "projects": [
+              {
+                "progress": "Got hired as help at the inn and paid for three nights. Haven't yet made the inn the town's meeting place again.",
+                "title": "Make the inn the heart of town again",
+                "why": "I've always wanted the inn to be where people come to talk and settle things. Being mayor and working there gives me a chance."
+              }
+            ],
+            "saying": "Rain's coming down hard again.",
+            "self": {
+              "advice": "Take it one shift at a time. Learn who trusts whom before I spend any treasury coin.",
+              "fear": "That the town will shut me out now that I'm supposed to be mayor, and I'll be the last to hear what's really happening.",
+              "strangers": "Warm them up with a name and a question; people open up over soup.",
+              "summary": "I stepped off the boat this morning and by evening I was mayor and an inn hand. The rain keeps falling and I still don't know half the town, but I've got a bed, a job, and a reason to listen.",
+              "want": "To have the inn be the place where the town's news and needs come together."
+            },
+            "summary": "Day one. I got off the boat with 40 coins, paid for three nights at the inn, and within a few hours the council named me mayor. I also got work as help at the inn, 2 coins a shift, starting tomorrow at eight. I talked with Ivana Horvat twice, mostly about the rain and the mill being slow. I bought soup twice. I didn't make it to the chandlery or the bakery, and I still don't know who runs what beyond Ivana. The rain didn't stop all day. I've got 36 coins left, a job, and a roof. Now I need to actually learn this town.",
+            "watch": []
+          }
+        },
+        {
+          "id": "gen-1789756948-OFEMGEIiT6IvdmNJ4dux",
+          "attempt": 2,
+          "output": {
+            "beliefs": [
+              {
+                "about": "mill",
+                "belief": "The mill's been slow with the damp; grain gets heavy.",
+                "confidence": 0.4
+              },
+              {
+                "about": "Ivana Horvat",
+                "belief": "Ivana doesn't follow the mill trade and is cautious about town business.",
+                "confidence": 0.3
+              },
+              {
+                "about": "my position",
+                "belief": "Being mayor means the treasury is mine to spend, but the island is watching.",
+                "confidence": 0.8
+              }
+            ],
+            "desires": [
+              {
+                "evidence": [
+                  29,
+                  21,
+                  38
+                ],
+                "state": "active",
+                "title": "Find work and a routine that keeps me fed and rested",
+                "why": "I need to support myself and establish a stable daily rhythm here."
+              },
+              {
+                "evidence": [
+                  25,
+                  26,
+                  44
+                ],
+                "state": "active",
+                "title": "Use the mayor's role to be at the center of town and hear what people need",
+                "why": "I want the inn to be the hub again, and being mayor gives me a reason to talk to everyone."
+              }
+            ],
+            "insights": [
+              "People are worried about the damp affecting the mill, but nobody seems sure who's handling it.",
+              "I've become mayor on my first day here, which is a huge responsibility and a chance to truly be at the heart of the island.",
+              "Even on a quiet Sunday, the inn is where news comes through; it's my natural base."
+            ],
+            "intentions": [
+              "Work my shift at the inn from eight to four and listen for who's talking about the mill's troubles.",
+              "Walk to the chandlery in the morning to introduce myself and see if there's any news or need.",
+              "Ask Ivana about the council's plans and what she's heard from people about the damp."
+            ],
+            "letter_to_owner": null,
+            "opinions": [
+              {
+                "about": "Ivana Horvat",
+                "opinion": "She seems measured, not quick to gossip; I think we'll work well together.",
+                "trust_delta": 0.05
+              },
+              {
+                "about": "Petar Ilić",
+                "opinion": "Haven't dealt with him directly yet; only know he runs the bakery.",
+                "trust_delta": 0
+              }
+            ],
+            "projects": [
+              {
+                "done": false,
+                "progress": "Just started; I got hired at the inn and took on the mayor's role.",
+                "title": "Make the inn the center of town again",
+                "why": "I want the inn to be where people gather and trust flows."
+              }
+            ],
+            "saying": "The rain won't stop us.",
+            "summary": "Stepped off the boat this morning with 40 coins, paid three nights at the inn, and got a job as help there. The council made me mayor today, and I've got the treasury for the island, which is a lot to weigh. I talked with Ivana Horvat a bit; she mentioned the bread is paste in this weather and I noted the mill's been slow with damp. Spent my day mostly at the inn, ate soup twice, and didn't get to the chandlery or the market walk as planned because the rain and the mayor business took over. I'm settling in, but I know I need to be careful with the town's trust.",
+            "watch": [
+              "the mill's condition",
+              "Ivana Horvat",
+              "the chandlery",
+              "the harbor inn's customers"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "agentId": "ag_2",
+      "name": "Petar Ilić",
+      "day": 1,
+      "coins": 38,
+      "home": {
+        "place": "inn",
+        "nightsPaid": 2
+      },
+      "dayMemories": [
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the market square (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 540; recorded observation; quoted claims remain claims] Observed local state at the mill (mill): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; recorded observation; quoted claims remain claims] Observed local state at the council hall (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 960; recorded observation; quoted claims remain claims] Observed local state at Ilić's bakery (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; reported speech, not verified experience] Rosa Vidal is mayor now.",
+        "[minute 360; intention, not completed work] What I meant to do today: find the mill and see if it still grinds island grain; get a meal and a look at the bakery",
+        "[minute 840; reported speech, not verified experience] Conversation at the market square: Ivana Horvat: “Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast.” Petar Ilić: “Aye, it's a proper soaking. At least the bread stays dry under the tarp. You're not stuck out here much longer, are you?” Ivana Horvat: “I'll wait it out a bit longer. Heard the council might raise the plot fees next month. You know anything about that?” Petar Ilić: “Just talk around the square, nothing I'd swear to. Prices here change with the wind more than the weather.”"
+      ],
+      "keyMemories": [
+        "[minute 540; recorded observation; quoted claims remain claims] Observed local state at the mill (mill): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 960; recorded observation; quoted claims remain claims] Observed local state at Ilić's bakery (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; recorded observation; quoted claims remain claims] Observed local state at the council hall (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the market square (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 420; personal interpretation, not verified experience] My plan today is to check the mill first, then the bakery, and then buy something to eat at the market."
+      ],
+      "actionEvidence": [
+        "[event 40, minute 780, agent.trade] Petar Ilić bought bread for 1.",
+        "[event 53, minute 960, agent.trade] Petar Ilić bought bread for 1."
+      ],
+      "desireEvidence": [
+        {
+          "id": 2,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.arrive",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić arrived on the boat.",
+          "importance": 0.5,
+          "place": "harbor"
+        },
+        {
+          "id": 4,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.plan",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić set out to find the mill and see if it still grinds island grain",
+          "importance": 0.15,
+          "place": "harbor",
+          "payload": {
+            "goals": [
+              "find the mill and see if it still grinds island grain",
+              "get a meal and a look at the bakery"
+            ],
+            "mood": "wary but determined"
+          }
+        },
+        {
+          "id": 7,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the market square.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 11,
+          "t": 420,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the hill road, on the way to the mill.",
+          "importance": 0.02,
+          "place": "hill",
+          "payload": {
+            "because": "I want to see the mill with my own eyes and find out whether it still grinds island grain. That was my plan for this morning, and I'm not going to put it off. The market can wait; I have coins for food later."
+          }
+        },
+        {
+          "id": 15,
+          "t": 480,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the mill.",
+          "importance": 0.02,
+          "place": "mill"
+        },
+        {
+          "id": 22,
+          "t": 540,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the hill road, on the way to the council hall.",
+          "importance": 0.02,
+          "place": "hill",
+          "payload": {
+            "because": "The council sits at ten and the whole town is going. I want to see the mill but it's Sunday and the council is the business of the town; I'll go there first, then come back to the bakery later. I have coins for a meal after."
+          }
+        },
+        {
+          "id": 27,
+          "t": 600,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the market square, on the way to the council hall.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 31,
+          "t": 660,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the council hall.",
+          "importance": 0.02,
+          "place": "council"
+        },
+        {
+          "id": 36,
+          "t": 720,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the market square.",
+          "importance": 0.02,
+          "place": "market",
+          "payload": {
+            "because": "I should buy something to eat at the market before I do anything else."
+          }
+        },
+        {
+          "id": 40,
+          "t": 780,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić bought bread for 1.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 45,
+          "t": 840,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić ate bread.",
+          "importance": 0.01,
+          "place": "market",
+          "payload": {
+            "because": "I eat the bread I'm carrying to stave off hunger before anything else today."
+          }
+        },
+        {
+          "id": 47,
+          "t": 840,
+          "day": 1,
+          "kind": "conversation",
+          "actors": [
+            "ag_3",
+            "ag_2"
+          ],
+          "text": "Ivana Horvat and Petar Ilić talked at the market square. Ivana Horvat: “Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast.” Petar Ilić: “Aye, it's a proper soaking. At least the bread s",
+          "importance": 0.27,
+          "place": "market",
+          "payload": {
+            "lines": [
+              {
+                "speaker": "ag_3",
+                "text": "Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast."
+              },
+              {
+                "speaker": "ag_2",
+                "text": "Aye, it's a proper soaking. At least the bread stays dry under the tarp. You're not stuck out here much longer, are you?"
+              },
+              {
+                "speaker": "ag_3",
+                "text": "I'll wait it out a bit longer. Heard the council might raise the plot fees next month. You know anything about that?"
+              },
+              {
+                "speaker": "ag_2",
+                "text": "Just talk around the square, nothing I'd swear to. Prices here change with the wind more than the weather."
+              }
+            ]
+          }
+        },
+        {
+          "id": 49,
+          "t": 900,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to Ilić's bakery.",
+          "importance": 0.02,
+          "place": "bakery"
+        },
+        {
+          "id": 53,
+          "t": 960,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić bought bread for 1.",
+          "importance": 0.02,
+          "place": "bakery",
+          "payload": {
+            "because": "I buy a loaf of bread from the bakery's shelf for one coin so I can eat it."
+          }
+        },
+        {
+          "id": 56,
+          "t": 1020,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić ate bread.",
+          "importance": 0.01,
+          "place": "bakery",
+          "payload": {
+            "because": "I eat this loaf of bread I'm carrying to take the edge off my hunger."
+          }
+        },
+        {
+          "id": 67,
+          "t": 1260,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the market square.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 69,
+          "t": 1320,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn"
+        },
+        {
+          "id": 71,
+          "t": 1380,
+          "day": 1,
+          "kind": "agent.sleep",
+          "actors": [
+            "ag_2"
+          ],
+          "text": "Petar Ilić went to sleep at the harbor inn.",
+          "importance": 0.01,
+          "place": "inn"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "gen-1789756971-qFTDMqskvg1ROB5bDfMm",
+          "attempt": 1,
+          "output": {
+            "summary": "I got off the boat this morning with forty coins and paid for three nights at the inn. I walked to the mill to see if it still grinds island grain, but I couldn't tell much beyond the place standing there. I didn't get to the bakery before the market, where I bought bread twice. The rain came down hard and I talked with Ivana Horvat about the weather and rumors of higher plot fees. I slept at the inn after a long day.",
+            "insights": [
+              "The mill is still standing, but I didn't see anyone or any sign of grinding. I need to ask around who runs it now.",
+              "The market has bread for sale, but I want to see my own bakery's bread, not buy someone else's.",
+              "The talk about plot fees is just talk until the council says something."
+            ],
+            "opinions": [
+              {
+                "about": "Ivana Horvat",
+                "opinion": "She seems friendly enough, but I don't know her yet.",
+                "trust_delta": 0
+              }
+            ],
+            "intentions": [
+              "I will go to the mill tomorrow morning and ask whoever's there about the grain.",
+              "I will walk to the bakery and see who's working and what they're doing.",
+              "I will find a job for tomorrow, maybe at the mill or the orchard."
+            ],
+            "letter_to_owner": null,
+            "watch": [
+              "the mill",
+              "the bakery",
+              "Rosa Vidal"
+            ],
+            "self": {
+              "summary": "I'm Petar, a baker who can't keep staff and blames them. I came back to the island to see if I can make the bakery work again.",
+              "want": "I want flour from the island's own mill again.",
+              "fear": "I fear closing the bakery my father opened.",
+              "strangers": "I am gruff with strangers, then fair.",
+              "advice": "I argue when advised, then quietly follow it."
+            },
+            "projects": [
+              {
+                "title": "See if the mill still grinds island grain",
+                "progress": "Visited the mill, saw it standing but no sign of work. Need to ask someone who runs it."
+              }
+            ],
+            "beliefs": [
+              {
+                "about": "the island",
+                "belief": "The mill might be idle or not grinding island grain anymore, but I don't know for sure.",
+                "confidence": 0.4
+              }
+            ],
+            "saying": "Prices here change with the wind more than the weather."
+          }
+        },
+        {
+          "id": "gen-1789756979-5eJeQpkIqWDEQ0D0xtWl",
+          "attempt": 2,
+          "output": {
+            "summary": "I got off the boat this morning and meant to check the mill and then the bakery, but I only made it to the mill before the rain set in. I saw the mill was standing and went to the council hall, then back to the market where I talked with Ivana about the weather and rumors of plot fees. I never made it to the bakery until later, and I only ate bread twice. I paid for a room at the inn, but I didn't get a proper look at the bakery's ovens or who's running them now.",
+            "insights": [
+              "The mill is still there, but I couldn't tell if it's grinding island grain or not.",
+              "The rain kept me from doing much of what I planned today."
+            ],
+            "opinions": [
+              {
+                "about": "Ivana Horvat",
+                "opinion": "She's friendly enough, but I don't know her well.",
+                "trust_delta": 0
+              }
+            ],
+            "intentions": [
+              "Go to the bakery early and see the ovens and who's working there.",
+              "Check with the miller about what grain he's grinding.",
+              "Find out about the plot fees at the council."
+            ],
+            "letter_to_owner": null,
+            "watch": [
+              "bakery",
+              "mill",
+              "market square",
+              "council hall"
+            ],
+            "projects": [
+              {
+                "title": "Get the bakery using island mill flour again",
+                "why": "The bakery needs to stop relying on mainland flour; it's costing me too much.",
+                "progress": "Just arrived and only looked at the mill from the outside."
+              }
+            ],
+            "beliefs": [
+              {
+                "about": "the island",
+                "belief": "The island is small and talk moves fast, but no one tells you anything straight.",
+                "confidence": 0.6
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "agentId": "ag_3",
+      "name": "Ivana Horvat",
+      "day": 1,
+      "coins": 37,
+      "home": {
+        "place": "inn",
+        "nightsPaid": 2
+      },
+      "dayMemories": [
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 720; reported speech, not verified experience] Conversation at the harbor inn: Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I heard the mill's been slow with the damp. Grain gets heavy.” Ivana Horvat: “Could be. I don't follow that trade. You'd know better than I would.”",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 480; recorded observation; quoted claims remain claims] Observed local state at the market square (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; reported speech, not verified experience] Rosa Vidal is mayor now.",
+        "[minute 720; reported speech, not verified experience] Rosa Vidal told me: Rosa claimed the mill has been slow because of the damp weather.",
+        "[minute 360; intention, not completed work] What I meant to do today: find food and rest; learn the town layout; stay inconspicuous",
+        "[minute 840; reported speech, not verified experience] Conversation at the market square: Ivana Horvat: “Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast.” Petar Ilić: “Aye, it's a proper soaking. At least the bread stays dry under the tarp. You're not stuck out here much longer, are you?” Ivana Horvat: “I'll wait it out a bit longer. Heard the council might raise the plot fees next month. You know anything about that?” Petar Ilić: “Just talk around the square, nothing I'd swear to. Prices here change with the wind more than the weather.”",
+        "[minute 540; recorded observation; quoted claims remain claims] Rosa Vidal said to Ivana Horvat: \"Morning, Ivana. Rough weather out there. What's the word around town these days?\"",
+        "[minute 780; recorded observation; quoted claims remain claims] Rosa Vidal said to Ivana Horvat: \"It's Sunday, so no shifts today, but my shift at the inn starts tomorrow at eight. You still planning to keep the inn as your base?\"",
+        "[minute 840; recorded observation; quoted claims remain claims] Rosa Vidal said to Ivana Horvat: \"It's still pouring. I'm mayor now, and I'd rather hear what folks really need than sit on that. You know anyone struggling with the damp or the mill?\""
+      ],
+      "keyMemories": [
+        "[minute 720; reported speech, not verified experience] Conversation at the harbor inn: Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I heard the mill's been slow with the damp. Grain gets heavy.” Ivana Horvat: “Could be. I don't follow that trade. You'd know better than I would.”",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 480; recorded observation; quoted claims remain claims] Observed local state at the market square (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 720; personal interpretation, not verified experience] My interpretation of the conversation with Rosa Vidal: Ivana said the inn's bread turns pasty in rain, and that she doesn't follow the mill trade.",
+        "[minute 720; reported speech, not verified experience] Rosa Vidal told me: Rosa claimed the mill has been slow because of the damp weather."
+      ],
+      "actionEvidence": [
+        "[event 42, minute 780, agent.trade] Ivana Horvat bought soup for 2.",
+        "[event 61, minute 1140, agent.trade] Ivana Horvat bought bread for 1."
+      ],
+      "desireEvidence": [
+        {
+          "id": 3,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.arrive",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat arrived on the boat.",
+          "importance": 0.5,
+          "place": "harbor"
+        },
+        {
+          "id": 5,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.plan",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat set out to find food and rest",
+          "importance": 0.15,
+          "place": "harbor",
+          "payload": {
+            "goals": [
+              "find food and rest",
+              "learn the town layout",
+              "stay inconspicuous"
+            ],
+            "mood": "tired, wary, polite"
+          }
+        },
+        {
+          "id": 8,
+          "t": 360,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn"
+        },
+        {
+          "id": 12,
+          "t": 420,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the market square.",
+          "importance": 0.02,
+          "place": "market",
+          "payload": {
+            "because": "Walk through the market square to observe the town and its people, as I planned this morning. I have coins and food is available at the inn, but I want to see the layout first."
+          }
+        },
+        {
+          "id": 17,
+          "t": 480,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "I'm hungry and tired. I'll go to the inn to buy and eat something, then rest."
+          }
+        },
+        {
+          "id": 21,
+          "t": 540,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “Morning, Ivana. Rough weather out there. What's the word around town these days?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Greet Ivana and ask for local news and gossip while I'm here at the inn."
+          }
+        },
+        {
+          "id": 23,
+          "t": 540,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the market square, on the way to the council hall.",
+          "importance": 0.02,
+          "place": "market",
+          "payload": {
+            "because": "I'm going to the council hall as planned to note the door and observe the town's business, keeping my distance."
+          }
+        },
+        {
+          "id": 28,
+          "t": 600,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the council hall.",
+          "importance": 0.02,
+          "place": "council"
+        },
+        {
+          "id": 32,
+          "t": 660,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the market square.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 37,
+          "t": 720,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "I'm going to the inn to buy and eat some soup and bread, and then rest. I have 40 coins and enough hunger to need a meal now."
+          }
+        },
+        {
+          "id": 38,
+          "t": 720,
+          "day": 1,
+          "kind": "conversation",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal and Ivana Horvat talked at the harbor inn. Rosa Vidal: “Rain's coming down hard again. You here for the soup or the company?” Ivana Horvat: “Soup, mostly. The bread they serve here turns to paste in this weather.” Rosa Vidal: “I ",
+          "importance": 0.67,
+          "place": "inn",
+          "payload": {
+            "lines": [
+              {
+                "speaker": "ag_1",
+                "text": "Rain's coming down hard again. You here for the soup or the company?"
+              },
+              {
+                "speaker": "ag_3",
+                "text": "Soup, mostly. The bread they serve here turns to paste in this weather."
+              },
+              {
+                "speaker": "ag_1",
+                "text": "I heard the mill's been slow with the damp. Grain gets heavy."
+              },
+              {
+                "speaker": "ag_3",
+                "text": "Could be. I don't follow that trade. You'd know better than I would."
+              }
+            ]
+          }
+        },
+        {
+          "id": 41,
+          "t": 780,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “It's Sunday, so no shifts today, but my shift at the inn starts tomorrow at eight. You still planning to keep the inn as your base?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Keep talking with Ivana to stay in the loop, and see if she's thinking of lodging here."
+          }
+        },
+        {
+          "id": 42,
+          "t": 780,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat bought soup for 2.",
+          "importance": 0.02,
+          "place": "inn",
+          "payload": {
+            "because": "I'm buying soup here at the inn to eat now, since I'm starving and have 40 coins."
+          }
+        },
+        {
+          "id": 44,
+          "t": 840,
+          "day": 1,
+          "kind": "agent.say",
+          "actors": [
+            "ag_1",
+            "ag_3"
+          ],
+          "text": "Rosa Vidal to Ivana Horvat: “It's still pouring. I'm mayor now, and I'd rather hear what folks really need than sit on that. You know anyone struggling with the damp or the mill?”",
+          "importance": 0.15,
+          "place": "inn",
+          "payload": {
+            "because": "Staying in conversation with Ivana to gather town news and fulfill my goal of learning who runs what."
+          }
+        },
+        {
+          "id": 46,
+          "t": 840,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the market square, on the way to the council hall.",
+          "importance": 0.02,
+          "place": "market",
+          "payload": {
+            "because": "Going to the council hall for the council day meeting, since today is when the mayor is chosen and I want to be present and observe the proceedings."
+          }
+        },
+        {
+          "id": 47,
+          "t": 840,
+          "day": 1,
+          "kind": "conversation",
+          "actors": [
+            "ag_3",
+            "ag_2"
+          ],
+          "text": "Ivana Horvat and Petar Ilić talked at the market square. Ivana Horvat: “Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast.” Petar Ilić: “Aye, it's a proper soaking. At least the bread s",
+          "importance": 0.27,
+          "place": "market",
+          "payload": {
+            "lines": [
+              {
+                "speaker": "ag_3",
+                "text": "Rain's really coming down now, Petar. The stall covers are holding, but the ground's turning to mud fast."
+              },
+              {
+                "speaker": "ag_2",
+                "text": "Aye, it's a proper soaking. At least the bread stays dry under the tarp. You're not stuck out here much longer, are you?"
+              },
+              {
+                "speaker": "ag_3",
+                "text": "I'll wait it out a bit longer. Heard the council might raise the plot fees next month. You know anything about that?"
+              },
+              {
+                "speaker": "ag_2",
+                "text": "Just talk around the square, nothing I'd swear to. Prices here change with the wind more than the weather."
+              }
+            ]
+          }
+        },
+        {
+          "id": 50,
+          "t": 900,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat ate soup.",
+          "importance": 0.01,
+          "place": "market"
+        },
+        {
+          "id": 52,
+          "t": 960,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the council hall.",
+          "importance": 0.02,
+          "place": "council"
+        },
+        {
+          "id": 59,
+          "t": 1080,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the market square.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 61,
+          "t": 1140,
+          "day": 1,
+          "kind": "agent.trade",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat bought bread for 1.",
+          "importance": 0.02,
+          "place": "market"
+        },
+        {
+          "id": 65,
+          "t": 1200,
+          "day": 1,
+          "kind": "agent.eat",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat ate bread.",
+          "importance": 0.01,
+          "place": "market"
+        },
+        {
+          "id": 68,
+          "t": 1260,
+          "day": 1,
+          "kind": "agent.move",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to the harbor inn.",
+          "importance": 0.02,
+          "place": "inn"
+        },
+        {
+          "id": 70,
+          "t": 1320,
+          "day": 1,
+          "kind": "agent.sleep",
+          "actors": [
+            "ag_3"
+          ],
+          "text": "Ivana Horvat went to sleep at the harbor inn.",
+          "importance": 0.01,
+          "place": "inn"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "gen-1789756987-lywYJPOekHC7Z7ek4XSZ",
+          "attempt": 1,
+          "output": {
+            "desires": [
+              {
+                "evidence": [
+                  5,
+                  38,
+                  47
+                ],
+                "id": "new-1",
+                "state": "active",
+                "title": "Stay inconspicuous until the election",
+                "why": "I need to be seen as careful, not pushy, so I don't hand my opponents a reason to blame me."
+              },
+              {
+                "evidence": [
+                  44
+                ],
+                "id": "new-2",
+                "state": "active",
+                "title": "Keep the mill issue from forcing a vote before the election",
+                "why": "I asked for that survey to stall, and I'll keep doing that."
+              }
+            ],
+            "insights": [
+              "Rosa is mayor now and seems to be testing what I know about the town.",
+              "People talk about the mill and plot fees, but nobody will swear to anything.",
+              "I need to keep my head down, but I also need to learn who's who."
+            ],
+            "intentions": [
+              "Tomorrow I'll go to the council hall and see what's on the agenda.",
+              "I'll ask around about the mill survey, but only in passing.",
+              "I'll find a regular shift, maybe at the chandlery, to look like I belong."
+            ],
+            "letter_to_owner": null,
+            "opinions": [
+              {
+                "about": "Rosa Vidal",
+                "opinion": "She's friendly but sharp, and I can't tell if she's an ally or a rival.",
+                "trust_delta": -0.05
+              },
+              {
+                "about": "Petar Ilić",
+                "opinion": "He's cautious, keeps to bread talk. I can use that.",
+                "trust_delta": 0.05
+              }
+            ],
+            "projects": [
+              {
+                "title": "Get a second term as mayor",
+                "why": "That's why I'm here, and I need to make sure no decision gets pinned on me."
+              }
+            ],
+            "summary": "I came off the boat with forty coins, paid three nights at the inn, and ended the day with thirty-seven and two nights left. I bought soup and bread, walked around, talked to Rosa and Petar. I didn't do any work yet. I kept my mouth shut about the mill, but I asked about plot fees. I think I made myself look harmless, but I need to be careful.",
+            "watch": [
+              "Rosa Vidal",
+              "council hall",
+              "the mill"
+            ]
+          }
+        },
+        {
+          "id": "gen-1789756996-pjViXX60gvz3NSy1fQLF",
+          "attempt": 2,
+          "output": {
+            "desires": [
+              {
+                "evidence": [
+                  5,
+                  8,
+                  12
+                ],
+                "state": "active",
+                "title": "Find food and rest",
+                "why": "I need to keep my strength while I learn the town and decide my next move."
+              },
+              {
+                "evidence": [
+                  8,
+                  23,
+                  28
+                ],
+                "state": "active",
+                "title": "Learn the town layout",
+                "why": "I walked the harbor, market, and council hall today. I want to know every street and who belongs to it."
+              }
+            ],
+            "insights": [
+              "Rosa Vidal is mayor now and seems to be fishing for what people need. I should stay polite but vague until I know more.",
+              "The damp is slowing the mill and people are talking about it. That could be a wedge issue if I need one.",
+              "Petar Ilić hears rumors about plot fees but won't vouch for them. The council is already on people's minds."
+            ],
+            "intentions": [
+              "Ask around quietly about how the mill is doing and whether anyone blames the mayor for it.",
+              "Offer to help at the inn or chandlery to earn coins and hear more talk.",
+              "Walk the hill road and orchard to see more of the island and who lives there."
+            ],
+            "letter_to_owner": null,
+            "opinions": [
+              {
+                "about": "Rosa Vidal",
+                "opinion": "She's chatty but careful, and she's already mayor. I'll keep my distance but stay friendly.",
+                "trust_delta": 0
+              },
+              {
+                "about": "Petar Ilić",
+                "opinion": "He's a baker who hears rumors but won't commit to them. Seems honest enough.",
+                "trust_delta": 0.05
+              }
+            ],
+            "projects": [
+              {
+                "title": "Find food and rest",
+                "why": "I need a stable place and enough to eat while I get my bearings."
+              },
+              {
+                "title": "Learn the town layout",
+                "why": "I want to know every corner of this island so I can see what's really going on."
+              }
+            ],
+            "saying": "Prices here change with the wind more than the weather.",
+            "self": {
+              "summary": "I'm a stranger here, and I mean to stay that way until I see which way the wind blows.",
+              "want": "I want to understand who runs things and where the blame lands, so I can decide if I want a second term or not."
+            },
+            "summary": "I arrived this morning, paid for three nights at the inn, bought soup and bread, and walked the harbor, market, and council hall. The rain has been heavy all day. I talked with Rosa Vidal, who is mayor, and with Petar Ilić, the baker. I stayed mostly vague about my own interests. I still have 37 coins and two nights paid at the inn. I haven't done any work yet.",
+            "watch": [
+              "Rosa Vidal",
+              "the mill",
+              "the council hall"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

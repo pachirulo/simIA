@@ -1,5 +1,64 @@
 # Arquitectura cognitiva: refactor interno
 
+Actualización del 18/09/2026: [coherencia cognitiva y evidencia](cognition-coherence-evidence-2026-09-18.md).
+Añade comprobaciones puras de intención (`semantics/intent.ts`), fuente y resultados
+(`semantics/evidence.ts`), atribución de diálogo (`semantics/dialogue.ts`) y conservación
+de propuestas reparadas (`semantics/repair.ts`). Los builders ordenan los datos
+actuales; el proveedor mantiene su presupuesto de respuestas. `reflectionIssue`
+acepta el contexto ya existente; no se agrega una interfaz pública ni almacenamiento.
+Los límites de cobertura y el avance pendiente están en el [plan](cognition-coherence-plan-2026-09-18.md).
+El resto de este documento describe el refactor histórico; las menciones a cambios
+de tests del engine corresponden a ese refactor, no a este trabajo de coherencia.
+
+Actualización final de esta iteración: [implementación, métricas y fronteras](cognition-coherence-final-review-2026-09-18.md). La conversación tiene un único escritor con entradas públicas: se excluyen los datos privados de ambos agentes y solo se recuperan declaraciones explícitas compartidas. Esta es la alternativa elegida por el usuario para mantener el presupuesto; no implica dos mentes aisladas ni garantiza que el modelo no invente biografía. Las precondiciones y la atribución posterior se comprueban con funciones puras, antes de entregar resultados canónicos.
+
+## Correspondencia con la arquitectura objetivo del usuario
+
+La comparación visual aportada el 18/09 es una dirección de diseño. Su columna final
+se desarrolla por objetivos del plan; no describe un resultado ya demostrado. La
+columna anterior tampoco reemplaza la auditoría: por ejemplo, el request original
+de R1 sí contenía el pan transportado.
+
+| Bloque de la imagen | Implementación y estado comprobado |
+| --- | --- |
+| Percepción, inventario, ubicación y heading | Builders de contexto con datos suministrados; planificación incorpora recursos. La observabilidad y el aislamiento del conocimiento privado siguen teniendo límites. |
+| Continuidad | Historial acotado de propuestas y cambios observados. Un cambio no se atribuye automáticamente a una propuesta; no hay un recibo nuevo de ejecución. |
+| Evidencia y fuentes | `semantics/sources.ts` define `SourceAssertion`: texto, origen, hablante explícito, minuto registrado, certeza y condición. `context/reflection-evidence.ts` construye el mismo marco para prompt y validación, sin leer memoria no seleccionada. |
+| LLM | Se mantienen proveedores, routing, contratos y presupuesto de respuestas. No se añade un juez LLM ni un cerebro paralelo. |
+| Coherencia y validación semántica | Controles de intención/acción, referencias, recursos observables, fuente y resultados reconocidos. Son verificaciones acotadas, no comprensión universal del lenguaje. |
+| Repair fiel | Solo se solicita ante error. Se conserva la propuesta original y se comprueba la reparación; una salida válida va directamente al engine. Reconsideración explícita y reparación local se distinguen. |
+| Engine sin cambios | Continúa ejecutando y registrando eventos con sus reglas actuales. Única excepción autorizada: restaurar island.ts y personas.ts desde sus copias originales inglesas. No se cambia la lógica del engine ni el protocolo. |
+| Memoria/reflexión con evidencia | Se comprueban afirmaciones nuevas contra evidencia personal parcial. Los recuerdos anteriores se conservan; condiciones, proyectos y paráfrasis todavía tienen objetivos abiertos. |
+| Menos loops/fallbacks y mayor fiabilidad | Metas de evaluación pendientes. Las corridas anteriores contienen fallos y no se recalculan como si hubieran usado esta versión. |
+
+Una diferencia importante respecto del dibujo: el engine guarda `proposal.remember`
+**antes** de aplicar la acción. Este plan no mueve ese paso. Cognition debe impedir
+que ese recuerdo anticipe un resultado; una reflexión posterior puede usar los
+eventos que el engine ya suministra. El ciclo de evidencia usa esas llamadas
+existentes, sin introducir un hook después de ejecutar ni una segunda persistencia.
+
+El marco de fuentes conserva las etiquetas originales y distingue observación,
+evento, habla, interpretación, carta, intención y origen desconocido. Una cita
+extraída mantiene su procedencia: si estaba en una interpretación, sigue siendo
+interpretada. `recordedAt` no es la fecha de cumplimiento de una promesa; `null`
+significa desconocido. Las condiciones textuales reconocidas quedan `unverified`:
+vincularlas con entregas y pagos corresponde al objetivo P5.3, aún abierto.
+
+Avance posterior del 18/09: `semantics/commitments.ts` construye trazas temporales
+para ofertas condicionales explícitas y formas de aceptación reconocidas. Los
+recibos de entrega y transferencia se contrastan por participantes, objeto, importe
+y orden. El prompt de reflexión recibe esas trazas junto con sus fuentes; el saldo
+informal sigue desconocido. La gramática es acotada y no interpreta cualquier
+promesa ni atribuye una transferencia a la liquidación de un acuerdo.
+
+La petición adicional de logs se implementa en dos límites: `provider/logging.ts`
+extrae `dialogue` del resultado aceptado, y `apps/server/src/dialogue-log.ts` extrae
+las frases de los eventos confirmados del mundo mediante el callback existente.
+Este último registro también incluye el habla ejecutada por `say`. Ninguno modifica
+el engine o añade un campo al protocolo de salida del modelo.
+
+## Antecedentes del refactor
+
 Actualización semántica: [contratos y validaciones de cognición](cognition-semantic-contract.md).
 Esa actualización incorpora comprobaciones posteriores a Zod y comparte los builders de
 decisión, plan y reflexión con Anthropic directo. Las menciones posteriores a Anthropic
@@ -70,7 +129,21 @@ El `WORLD` completo sólo se reconstruye para el adaptador directo `AnthropicBra
 
 ## Primer y caching
 
+Para reflexión, `context/reflection-updates.ts` comparte con el prompt y el
+validador los contadores de construcción de proyectos seleccionados, deseos
+visibles y eventos personales suministrados. `semantics/reflection-updates.ts`
+valida las referencias y los indicadores estructurados antes de recorrer la
+prosa. No crea otro almacenamiento ni convierte el cumplimiento subjetivo de un
+deseo en ejecución física. Los límites y errores están en el contrato semántico.
+
 `brain.primer` sigue siendo una cadena mutable inyectada por el server, leída en **cada** llamada, incluidas las auxiliares. `selectPrimer(kind, primer)` es el punto para una futura selección por operación. Actualmente devuelve la cadena completa: el contrato es texto opaco, por lo que adivinar secciones o recortarlo podría perder información dinámica. No se captura sólo en el constructor ni se guarda una copia obsoleta.
+
+Desde la revisión seed 468 del 18/09, `context/world-primer.ts` expone
+`worldPrimerOf(town)`: recibe nombre, lugares y world pack actuales y conserva el
+texto que antes construía el servidor. Servidor y headless actualizan el primer
+de OpenRouter antes de cada tick. No modifica el mundo ni hace llamadas al modelo.
+`provider/dialogue-log.ts` comparte el extractor de eventos confirmados; el servidor
+lo reexporta desde su módulo existente y headless persiste `dialogue.jsonl`.
 
 Se mantiene el orden:
 

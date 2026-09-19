@@ -33,16 +33,17 @@ describe("cognitive semantic contract (no world mutations)", () => {
 
   it("permits conscious risk, kindness, theft and disagreement with plans", () => {
     const p = hungry();
-    expect(decisionIssue(proposal(recipe(), { intent: "Aunque tengo hambre, prefiero arriesgarme para enseñar a mi hija." }), p)).toBeNull();
+    expect(decisionIssue(proposal(recipe(), { intent: "Although I am hungry, I prefer to take the risk to teach my daughter." }), p)).toBeNull();
     expect(decisionIssue(proposal({ kind: "take", item: "bread" }), p)).toBeNull();
-    expect(decisionIssue(proposal({ kind: "give", to: "vecino", coins: 35 }, { intent: "Quiero ayudarlo aunque pase hambre." }), p)).toBeNull();
+    p.nearby.push({ agent: "neighbor", name: "Vecino" });
+    expect(decisionIssue(proposal({ kind: "give", to: "neighbor", coins: 35 }, { intent: "I want to help him even if I go hungry." }), p)).toBeNull();
   });
 
   it("asks for an intentional tradeoff when exhausted, but permits sleep", () => {
     const p = hungry(); p.self.feels = { hunger: "fed", rest: "exhausted", social: "content" };
     expect(decisionIssue(proposal(recipe()), p)?.code).toBe("urgent_need_unaddressed");
     expect(decisionIssue(proposal({ kind: "sleep" }), p)).toBeNull();
-    expect(decisionIssue(proposal(recipe(), { intent: "Estoy agotada, pero quiero terminar esta receta por orgullo." }), p)).toBeNull();
+    expect(decisionIssue(proposal(recipe(), { intent: "I am exhausted, but I want to finish this recipe out of pride." }), p)).toBeNull();
   });
 
   it("work in options never proves employment or a working Sunday", () => {
@@ -51,6 +52,7 @@ describe("cognitive semantic contract (no world mutations)", () => {
     expect(decisionIssue(proposal({ kind: "work" }, { intent: "Earn money" }), p)?.code).toBe("work_precondition");
     p.time.weekday = "Monday";
     expect(workIssue(p)?.message).toContain("No assigned job");
+    p.place.jobs_open = ["market-help"];
     expect(decisionIssue(proposal({ kind: "apply" }), p)).toBeNull();
   });
 
@@ -61,19 +63,19 @@ describe("cognitive semantic contract (no world mutations)", () => {
     p.time.minute = 16 * 60; expect(workIssue(p)?.message).toContain("Outside");
     p.time.minute = 10 * 60; p.self.shift.place = "another-place"; expect(workIssue(p)?.message).toContain("elsewhere");
     p.time.weekday = "Sunday"; p.self.job = null;
-    p.place.site = { what: "house", name: "Casa", by: "Vecino", done: 0, of: 3 };
+    p.place.site = { what: "house", name: "House", by: "Vecino", done: 0, of: 3 };
     expect(workIssue(p)).toBeNull();
     p.self.weak = true; expect(workIssue(p)?.message).toContain("weak");
   });
 
-  it.each(["haz un caldo con lo que haya a", "use whatever food is available", "I will buy bread", "comprar pan para comer"])("rejects instruction in a skill item: %s", item => {
+  it.each(["make soup with whatever", "use whatever food is available", "I will buy bread", "buy bread to eat"])("rejects instruction in a skill item: %s", item => {
     const p = contexts().perception;
     const out = proposal(recipe(item)); // all these were valid canonical strings
     expect(decisionIssue(out, p)?.code).toBe("reference_not_name");
   });
 
   it("allows unknown concrete nouns, Unicode, multiword items and previously made products", () => {
-    for (const name of ["white bean soup", "pan de maíz", "青菜", "steamed buns"]) expect(concreteReferenceIssue(name, "item")).toBeNull();
+    for (const name of ["white bean soup", "cornbread", "pak choi", "steamed buns"]) expect(concreteReferenceIssue(name, "item")).toBeNull();
     const p = contexts().perception;
     expect(decisionIssue(proposal({ kind: "propose_skill", recipe: { name: "Preparar sopa", goal: "produce", steps: [
       { kind: "make", item: "bean soup", from: ["beans", "water"] }, { kind: "use", item: "bean soup" },
@@ -102,21 +104,21 @@ describe("cognitive semantic contract (no world mutations)", () => {
     expect(decisionIssue(proposal({ kind: "trade", sell: "bread" }), p)).toBeNull();
   });
 
-  it.each(["Go to the market, buy bread and eat it", "I buy bread", "Ir al mercado y comprar comida", "Comer el pan", "Saludo al vecino; luego voy al mercado", "I repair the roof"])("do cannot replace concrete operations: %s", what => {
+  it.each(["Go to the market, buy bread and eat it", "I buy bread", "Go to the market and buy food", "Eat the bread", "Greet the neighbor; then go to the market", "I repair the roof"])("do cannot replace concrete operations: %s", what => {
     expect(decisionIssue(proposal({ kind: "do", what }), contexts().perception)?.code).toBe("do_replaces_action");
   });
 
-  it.each(["Sing about buying bread", "Watch the sunset", "Hacer cola para comprar pan", "Recordar a mi madre"])("preserves genuinely free deeds: %s", what => {
+  it.each(["Sing about buying bread", "Watch the sunset", "Queue to buy bread", "Remember my mother"])("preserves genuinely free deeds: %s", what => {
     expect(decisionIssue(proposal({ kind: "do", what }), contexts().perception)).toBeNull();
   });
 
-  it.each(["The options include 'work' — a wage might come from it.", "Las opciones me permiten cobrar.", "The engine should give me coins for work."])("rejects mechanics speculation in remember: %s", text => {
+  it.each(["The options include 'work' — a wage might come from it.", "The options allow paid work.", "The engine should give me coins for work."])("rejects mechanics speculation in remember: %s", text => {
     expect(decisionIssue(proposal({ kind: "wait" }, { remember: [text] }), contexts().perception)?.code).toBe("memory_system_inference");
   });
 
   it("does not convert proposed, failed or reported purchases into personal experience", () => {
     const p = contexts().perception;
-    for (const claim of ["I bought bread.", "Compré pan."]) {
+    for (const claim of ["I bought bread.", "I purchased bread."]) {
       const out = proposal({ kind: "trade", buy: "bread" }, { remember: [claim] });
       p.recent = [`[minute 10; personal interpretation, not verified experience] ${claim}`];
       expect(decisionIssue(out, p)?.code).toBe("memory_unverified_outcome");
@@ -125,11 +127,11 @@ describe("cognitive semantic contract (no world mutations)", () => {
     }
     p.recent = ['[minute 10; recorded observation; quoted claims remain claims] Ana said "I bought bread."'];
     expect(decisionIssue(proposal({ kind: "wait" }, { remember: ["I bought bread."] }), p)?.code).toBe("memory_unverified_outcome");
-    for (const memory of ["I tried to buy bread but failed.", "Me dio vergüenza pedir ayuda.", "I believe Ana lied to me.", "Ana said I bought bread."]) expect(decisionIssue(proposal({ kind: "wait" }, { remember: [memory] }), p)).toBeNull();
+    for (const memory of ["I tried to buy bread but failed.", "I felt embarrassed to ask for help.", "I believe Ana lied to me.", "Ana said I bought bread."]) expect(decisionIssue(proposal({ kind: "wait" }, { remember: [memory] }), p)).toBeNull();
   });
 
   it("finds repetitive strings even inside nested fields; preserves normal emphasis", () => {
-    for (const text of ["que ".repeat(15), "I will go ".repeat(8), "a".repeat(30)]) {
+    for (const text of ["that ".repeat(15), "I will go ".repeat(8), "a".repeat(30)]) {
       expect(outputQualityIssue({ intent: text })?.code).toBe("repetition");
       expect(outputQualityIssue({ recipe: { steps: [{ item: text }] } })?.path).toBe("recipe.steps[0].item");
     }
@@ -146,7 +148,7 @@ describe("cognitive semantic contract (no world mutations)", () => {
     expect(p).toEqual(before);
     expect(buildDecideContext(c.perception, c.b).system.shared).toBe(built.system.shared);
     expect(buildPlanContext(c.plan).user).toContain(JSON.stringify(c.plan.agent.needs));
-    expect(planIssue({ mood: "Bien", goals: ["Comer"], steps: [{ hour: 9, place: "go buy bread" }] }, c.plan)?.code).toBe("plan_unknown_place");
+    expect(planIssue({ mood: "Fine", goals: ["Eat"], steps: [{ hour: 9, place: "go buy bread" }] }, c.plan)?.code).toBe("plan_unknown_place");
     expect(reflectionIssue({ summary: "The options include work.", insights: [], opinions: [], intentions: [], letter_to_owner: null })?.code).toBe("memory_system_inference");
   });
 });
@@ -164,13 +166,13 @@ describe("OpenRouter semantic repair boundary", () => {
   it.each([
     ["hunger", () => proposal(recipe())],
     ["work", () => proposal({ kind: "work" })],
-    ["item", () => proposal(recipe("haz un caldo con lo que haya a"))],
+    ["item", () => proposal(recipe("make soup with whatever"))],
     ["trade fields", () => proposal({ kind: "trade", with: "bread", sell: "." })],
     ["do", () => proposal({ kind: "do", what: "Go to the market, buy bread and eat it" })],
     ["remember", () => proposal({ kind: "wait" }, { remember: ["The options include work."] })],
-    ["repetition", () => proposal({ kind: "wait" }, { intent: "que ".repeat(20) })],
+    ["repetition", () => proposal({ kind: "wait" }, { intent: "that ".repeat(20) })],
   ] as const)("repairs a schema-valid %s error once, without executing or replaying invalid text", async (_name, bad) => {
-    const good = proposal({ kind: "trade", buy: "bread" });
+    const good = proposal({ kind: "trade", buy: "bread" }, { intent: "I cannot execute the previous proposal; I change my plan to buy bread now." });
     const bodies = mock([bad(), good]), p = hungry(), a = contexts().a;
     const brain = new OpenRouterBrain({ apiKey: "test", routine: "test", allowFallback: false });
     expect(await brain.decide(p, a, 1)).toEqual(good);
@@ -182,7 +184,7 @@ describe("OpenRouter semantic repair boundary", () => {
   });
 
   it("never delivers a repeated invalid response when fallback is disabled", async () => {
-    const bodies = mock([proposal({ kind: "wait" }, { intent: "que ".repeat(20) })]);
+    const bodies = mock([proposal({ kind: "wait" }, { intent: "that ".repeat(20) })]);
     const c = contexts(), hook = vi.fn();
     const brain = new OpenRouterBrain({ apiKey: "test", allowFallback: false }); brain.onFallback = hook;
     await expect(brain.decide(c.perception, c.a, 1)).rejects.toThrow("no synthetic response");
@@ -191,7 +193,7 @@ describe("OpenRouter semantic repair boundary", () => {
   });
 
   it("an invalid synthetic fallback cannot reintroduce bad memories", async () => {
-    mock([proposal({ kind: "wait" }, { intent: "que ".repeat(20) })]);
+    mock([proposal({ kind: "wait" }, { intent: "that ".repeat(20) })]);
     vi.spyOn(MockBrain.prototype, "decide").mockResolvedValue(proposal({ kind: "wait" }, { remember: ["The options include work."] }));
     const c = contexts(), brain = new OpenRouterBrain({ apiKey: "test", allowFallback: true });
     const out = await brain.decide(c.perception, c.a, 1);

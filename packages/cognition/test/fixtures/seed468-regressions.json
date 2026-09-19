@@ -1,0 +1,866 @@
+{
+  "source": {
+    "consoleSha256": "3a4b789523a0cf638a2f873625478de0a57f49a4a119d867ab53184b2400adce",
+    "seed": 468,
+    "days": 1,
+    "tick": 60
+  },
+  "trade": {
+    "id": "gen-1789715579-X8C1FnO8anjb5IMl08Xx",
+    "attempt": 1,
+    "output": {
+      "action": {
+        "kind": "trade",
+        "with": "bakery.cook",
+        "buy": "bread"
+      },
+      "intent": "Buy a loaf of bread for 1 coin so I have food with me to eat when I need it.",
+      "remember": []
+    },
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_1",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Pedro Ibáñez",
+            "place": "bakery",
+            "asleep": false
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 15:00",
+        "day": 1,
+        "minute": 900,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "bakery",
+        "needs": {
+          "hunger": 0.41999999999999993,
+          "rest": 0.7400000000000002,
+          "social": 0.7561517966166139
+        },
+        "feels": {
+          "hunger": "could eat",
+          "rest": "tired",
+          "social": "lonely"
+        },
+        "coins": 38,
+        "inventory": [
+          "suitcase"
+        ],
+        "job": null,
+        "shift": null,
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        },
+        "mayor": true,
+        "learned_food": [
+          {
+            "place": "inn",
+            "item": "soup",
+            "confidence": 0.6634732455166608,
+            "observations": 1
+          }
+        ]
+      },
+      "nearby": [
+        {
+          "agent": "ag_2",
+          "name": "Pedro Ibáñez",
+          "relation": {
+            "trust": 0.3,
+            "affection": 0.3,
+            "opinion": ""
+          },
+          "asleep": false
+        }
+      ],
+      "place": {
+        "id": "bakery",
+        "name": "el Horno de los Ibáñez",
+        "kind": "workplace",
+        "for_sale": [
+          {
+            "item": "bread",
+            "price": 1
+          }
+        ],
+        "jobs_open": [
+          "bakery.cook"
+        ],
+        "exits": [
+          "market"
+        ],
+        "owner": null,
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 840; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 420; recorded observation; quoted claims remain claims] Observed local state at el Mesón del Puente (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 840; personal interpretation, not verified experience] The council made me mayor today, so I'm expected to look after the island's interests.",
+        "[minute 840; personal interpretation, not verified experience] I am at the bakery, which has bread for sale at 1 coin.",
+        "[minute 840; personal interpretation, not verified experience] I have 38 coins and a suitcase."
+      ],
+      "owner_letters": [],
+      "today": {
+        "mood": "Curious and hopeful, a bit tired from the journey",
+        "goals": [
+          "Find a place to belong in this town",
+          "Learn the local gossip and who's who",
+          "Secure a way to earn coins"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "Walk to the inn and ask the innkeeper about the town, the people, and any work or news",
+            "place": "inn",
+            "done": true
+          },
+          {
+            "hour": 7,
+            "do": "Have breakfast at the inn, paying a coin if needed, and listen to the morning talk",
+            "place": "inn",
+            "done": true
+          },
+          {
+            "hour": 8,
+            "do": "Visit the market square to see who's about and catch up on local affairs",
+            "place": "market",
+            "done": true
+          },
+          {
+            "hour": 9,
+            "do": "Go to the tavern to introduce myself and hear any rumors or plans",
+            "place": "tavern",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 10,
+            "do": "Walk along the harbor and talk to the boatmen and fishermen about the town and any work",
+            "place": "harbor",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 11,
+            "do": "Return to the inn and rest a bit, thinking over what I've learned",
+            "place": "inn",
+            "done": false,
+            "missed": true
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "propose_skill",
+        "teach",
+        "lend",
+        "call"
+      ],
+      "deadline_ms": 8000
+    }
+  },
+  "dialogue": {
+    "id": "gen-1789715581-uZ5WAOdOwCQwIKdmFy8e",
+    "attempt": 1,
+    "output": {
+      "lines": [
+        {
+          "speaker": "B",
+          "text": "Pedro, you're back at the horno. I heard the council made Inés mayor—you know anything about that?"
+        },
+        {
+          "speaker": "A",
+          "text": "I was there. She's got the treasury now, but that don't feed nobody. You still baking with that cheap flour from the harbor?"
+        },
+        {
+          "speaker": "B",
+          "text": "Aye, and losing coins on every sack. But I need bread to sell, or the horno closes. You got a better price?"
+        },
+        {
+          "speaker": "A",
+          "text": "Maybe I know a miller up the river who'd trade for a favor, but I ain't promising nothing. You want me to ask around?"
+        },
+        {
+          "speaker": "B",
+          "text": "Ask. If he's fair, I'll take a load next week. Just don't tell my wife I'm bartering—she thinks I'm buying proper."
+        }
+      ],
+      "outcome": {
+        "a_trust_delta": 0.1,
+        "b_trust_delta": 0.05,
+        "a_remember": "offered to ask a miller about cheaper flour; B said he'd take a load if fair, but didn't want his wife to know he's bartering.",
+        "b_remember": "A said he might know a miller up the river who'd trade for a favor; no commitment yet. I told him I'd take a load if it's fair, but to keep the bartering quiet from my wife.",
+        "rumor": null
+      }
+    }
+  },
+  "firstReflection": {
+    "id": "gen-1789715602-lQbXykRCkn8GV0szAiHI",
+    "attempt": 1,
+    "output": {
+      "summary": "I stepped off the boat with forty coins and a suitcase, paid for three nights at the harbor inn, and made it as far as the Mesón, the plaza, and Pedro's bakery before the day was out. The council made me mayor and handed me the treasury, which feels more like a weight than a prize. I ate soup and bread, tried to trade at a few places that weren't open for business, and talked with Pedro about his flour troubles. I promised nothing, but I told him I'd look for a miller up the river.",
+      "insights": [
+        "Being mayor doesn't put coins in anyone's pocket, including mine. Pedro's losing money on flour and I've got a treasury that can't feed anybody. The real work is in trade, not titles.",
+        "I landed in a town where the inn, the market, and the bakery are all quiet. People are careful, and the island is watching me now. I have to earn my place, not assume it.",
+        "Pedro's bakery is struggling, and he's willing to barter if the price is fair. That's a door I can walk through tomorrow, if I find that miller."
+      ],
+      "opinions": [
+        {
+          "about": "Pedro Ibáñez",
+          "opinion": "He's a practical man, worried about keeping his horno open. He trusts me enough to ask about cheaper flour, but he'll buy from the market if I can't deliver. I like that he's straight about his needs.",
+          "trust_delta": 0.05
+        }
+      ],
+      "intentions": [
+        "Go look for the miller up the river and ask about trading for a favor.",
+        "If I find the miller, bring Pedro a fair price and see if he takes a load next week.",
+        "Find some work that earns coins, even if it's just helping at the inn or the tavern."
+      ],
+      "letter_to_owner": null,
+      "self": {
+        "summary": "I came here to find a place to belong, and instead I got handed a title that doesn't feed anyone. I still don't know who's who, but I've got my eyes open and my mouth shut when I need to be.",
+        "want": "I want the mesón to be the heart of this town again, but right now I just want to be someone people can count on, not just a name on a council seat.",
+        "fear": "I'm afraid of being the mayor nobody listens to, a stranger with a treasury and no real roots.",
+        "strangers": "I ask names first, but I'm learning to watch what people do before I trust their words.",
+        "advice": "I listen, but in the end I follow my own gut. That's how I've always run the mesón, and it's how I'll run this."
+      },
+      "watch": [
+        "el Mesón del Puente",
+        "el Horno de los Ibáñez",
+        "el miller up the river",
+        "la plaza del mercado"
+      ],
+      "projects": [
+        {
+          "title": "Find a place to belong in Valdearenas",
+          "why": "I came here to belong, and being made mayor doesn't mean I'm one of them yet.",
+          "progress": "Stepped off the boat, walked the plaza, talked to Pedro at the bakery, but I haven't earned my place beyond a title.",
+          "done": false
+        },
+        {
+          "title": "Learn the local gossip and who's who",
+          "why": "I can't be part of a town if I don't know its people and their business.",
+          "progress": "Spoke with Pedro about his flour troubles and heard the council made me mayor, but that's all I've got so far.",
+          "done": false
+        },
+        {
+          "title": "Secure a way to earn coins",
+          "why": "I've got 37 coins left and two paid nights at the inn. I need income, not just a treasury.",
+          "progress": "Bought soup and bread, tried to trade at a few places that weren't open for business. Nothing earned yet.",
+          "done": false
+        }
+      ],
+      "beliefs": [
+        {
+          "about": "the island",
+          "belief": "The island is watching me now that I'm mayor, and I'll be judged by what I do, not what I say.",
+          "confidence": 0.8
+        },
+        {
+          "about": "Pedro Ibáñez",
+          "belief": "Pedro is honest about his troubles and willing to work with me if I bring a fair deal.",
+          "confidence": 0.6
+        }
+      ],
+      "desires": [
+        {
+          "id": "find-a-place-to-belong",
+          "title": "Find a place to belong in Valdearenas",
+          "why": "I came here to be part of this town, and being mayor doesn't mean I belong yet. I need to prove myself through real work and connections.",
+          "state": "active",
+          "evidence": [
+            4
+          ]
+        },
+        {
+          "id": "learn-gossip-and-who-is-who",
+          "title": "Learn the local gossip and who's who",
+          "why": "I can't be at the center of things if I don't know the people and their business. Pedro is a start, but I barely know anyone.",
+          "state": "active",
+          "evidence": [
+            38
+          ]
+        }
+      ],
+      "saying": "Mayor doesn't feed nobody."
+    }
+  },
+  "reflection": {
+    "id": "gen-1789715617-75ajLHpSks2pjJr8evOP",
+    "attempt": 2,
+    "output": {
+      "summary": "I landed this morning with 40 coins and no plan beyond finding a place here. I bought soup and bread, walked the market and the bakery, and ended up mayor—the council says I'm the one the island trusts most, which still feels odd. I talked to Pedro at the horno; he's losing coins on cheap flour and needs a better price. I told him I might know a miller up the river, and he said if the miller is fair he'd take a load next week, but he's buying from the market tomorrow to keep bread on the shelf. I didn't find the miller yet, and I didn't get to the tavern or the harbor. I have 37 coins and two nights paid at the inn.",
+      "insights": [
+        "Being mayor means the treasury is mine to spend, but that doesn't put food on anyone's table. I need to earn my keep like everyone else.",
+        "Pedro's bakery is struggling with flour costs. That's a real problem I might be able to help with, if I can find that miller.",
+        "I spent most of the day walking and talking, not doing. Tomorrow I need to actually find the miller, not just promise to."
+      ],
+      "opinions": [
+        {
+          "about": "Pedro Ibáñez",
+          "opinion": "He's a hardworking baker, honest about his losses, but he's careful with his coins and his wife. I trust him a bit more now.",
+          "trust_delta": 0.1
+        }
+      ],
+      "intentions": [
+        "I will ask around town for the miller up the river and try to find him.",
+        "I will check the tavern and the harbor to learn the local gossip and who's who.",
+        "I will figure out how to use the treasury to help the town without starving myself."
+      ],
+      "letter_to_owner": null,
+      "watch": [
+        "Pedro Ibáñez",
+        "the miller up the river",
+        "the treasury",
+        "the harbor"
+      ],
+      "projects": [
+        {
+          "title": "Find a place to belong in this town",
+          "why": "I came here to belong, and being mayor is a start, but I need to be part of the daily life.",
+          "progress": "I've met Pedro and walked the market, but I haven't found my footing yet.",
+          "done": false
+        },
+        {
+          "title": "Learn the local gossip and who's who",
+          "why": "To know the town, I need to hear its stories. The tavern and harbor are the best places for that.",
+          "progress": "I only talked to Pedro today. I haven't been to the tavern or harbor.",
+          "done": false
+        },
+        {
+          "title": "Secure a way to earn coins",
+          "why": "I have 37 coins and two nights paid. I need a steady income or I'll be broke.",
+          "progress": "No job yet. I bought soup and bread, and I'm looking for opportunities.",
+          "done": false
+        }
+      ],
+      "beliefs": [
+        {
+          "about": "Pedro Ibáñez",
+          "belief": "Pedro is a hardworking baker who's struggling with flour costs and might be open to barter if the price is right.",
+          "confidence": 0.7
+        },
+        {
+          "about": "The island",
+          "belief": "The island trusts me enough to make me mayor, but that trust is fragile and I need to prove I can handle it.",
+          "confidence": 0.6
+        }
+      ],
+      "saying": "Let me ask around."
+    }
+  },
+  "invalidReflection": {
+    "id": "gen-1789715625-vdCQvhofxdWtzz2okCYk",
+    "attempt": 1,
+    "output": {
+      "desires": [
+        {
+          "id": 3,
+          "title": "Find a way to bake with local miller's flour",
+          "why": "Cheap harbor flour is bleeding me dry. Inés said she might know a miller; if he's fair, I'll take a load.",
+          "state": "active",
+          "evidence": [
+            38,
+            44
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Keep the horno open",
+          "why": "My father opened that horno, I won't be the one to close it.",
+          "state": "active",
+          "evidence": []
+        }
+      ],
+      "summary": "I got off the boat, paid for three nights at the inn, walked to the horno. It stood empty. No flour, no help. Inés came by; she's mayor now. She asked if I still used the cheap harbor flour and I admitted it, what else could I say. She offered to find a miller up the river, maybe trade for a favor. I told her to ask, and I'd take a load if the price was fair. Bought some bread to eat, tried to trade but no shop was open. I lost coins on every sack, but there's no other way unless she comes through.",
+      "insights": [
+        "The horno has no flour and no staff; I walked into a dead bakery.",
+        "Inés is mayor now, and she seems to know the local trade better than I do.",
+        "I can't keep buying from the harbor; I'm losing coins every time, but bread has to be on the shelf."
+      ],
+      "opinions": [
+        {
+          "about": "Inés Vidal",
+          "opinion": "She's sharp and knows people. Might be worth trusting a little more if she finds that miller.",
+          "trust_delta": 0.1
+        }
+      ],
+      "intentions": [
+        "I'll go to the horno at dawn and see if any flour arrived, and maybe clean the oven.",
+        "I'll go to the mill and ask about local flour in person if Inés hasn't come back.",
+        "I'll buy a few more loaves from the market if I must, to sell tomorrow."
+      ],
+      "letter_to_owner": null,
+      "self": null,
+      "watch": [
+        "el Horno de los Ibáñez",
+        "el Molino de los Molina",
+        "Inés Vidal",
+        "la plaza del mercado"
+      ],
+      "projects": [
+        {
+          "title": "Find a way to bake with local miller's flour",
+          "stand": "waiting on Inés to ask the miller, but I'll go myself if she doesn't."
+        },
+        {
+          "title": "Keep the horno open",
+          "stand": "Horno still empty, no flour, no staff; I'm still determined to reopen it."
+        }
+      ],
+      "beliefs": [
+        {
+          "belief": "Cheap harbor flour costs me more than it saves.",
+          "sure": 1
+        },
+        {
+          "belief": "Inés knows people and might be able to help, but she won't promise anything.",
+          "sure": 0.8
+        },
+        {
+          "belief": "The horno won't run itself; I have to work it or close it.",
+          "sure": 0.9
+        }
+      ],
+      "saying": null
+    }
+  },
+  "evidence": {
+    "actionEvidence": [
+      "[event 8, minute 420, action.rejected] Inés Vidal tried to trade but shop is elsewhere.",
+      "[event 12, minute 480, agent.trade] Inés Vidal bought soup for 2.",
+      "[event 33, minute 840, action.rejected] Inés Vidal tried to trade but shop is elsewhere.",
+      "[event 37, minute 900, action.rejected] Inés Vidal tried to trade but shop is elsewhere.",
+      "[event 40, minute 960, action.rejected] Inés Vidal tried to trade but shop is elsewhere.",
+      "[event 43, minute 1020, action.rejected] Inés Vidal tried to trade but shop is elsewhere.",
+      "[event 49, minute 1140, agent.trade] Inés Vidal bought bread for 1."
+    ],
+    "dayMemories": [
+      "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+      "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+      "[minute 420; recorded observation; quoted claims remain claims] Observed local state at el Mesón del Puente (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 840; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 900; reported speech, not verified experience] Conversation at el Horno de los Ibáñez: Pedro Ibáñez: “Pedro, you're back at the horno. I heard the council made Inés mayor—you know anything about that?” Inés Vidal: “I was there. She's got the treasury now, but that don't feed nobody. You still baking with that cheap flour from the harbor?” Pedro Ibáñez: “Aye, and losing coins on every sack. But I need bread to sell, or the horno closes. You got a better price?” Inés Vidal: “Maybe I know a miller up the river who'd trade for a favor, but I ain't promising nothing. You want me to ask around?” Pedro Ibáñez: “Ask. If he's fair, I'll take a load next week. Just don't tell my wife I'm bartering—she thinks I'm buying proper.”",
+      "[minute 360; intention, not completed work] What I meant to do today: Find a place to belong in this town; Learn the local gossip and who's who; Secure a way to earn coins",
+      "[minute 1020; recorded observation; quoted claims remain claims] Pedro Ibáñez said: \"Inés, if you can find that miller, I'll take the flour. But I need bread on the shelf tomorrow, so I'll buy from the market today.\"",
+      "[minute 1080; recorded observation; quoted claims remain claims] I said: \"Pedro, I'll go look for that miller come morning. For now, let me buy a loaf so I'm not starving before I do.\""
+    ],
+    "keyMemories": [
+      "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+      "[minute 840; recorded observation; quoted claims remain claims] Observed local state at el Horno de los Ibáñez (bakery): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 900; reported speech, not verified experience] Conversation at el Horno de los Ibáñez: Pedro Ibáñez: “Pedro, you're back at the horno. I heard the council made Inés mayor—you know anything about that?” Inés Vidal: “I was there. She's got the treasury now, but that don't feed nobody. You still baking with that cheap flour from the harbor?” Pedro Ibáñez: “Aye, and losing coins on every sack. But I need bread to sell, or the horno closes. You got a better price?” Inés Vidal: “Maybe I know a miller up the river who'd trade for a favor, but I ain't promising nothing. You want me to ask around?” Pedro Ibáñez: “Ask. If he's fair, I'll take a load next week. Just don't tell my wife I'm bartering—she thinks I'm buying proper.”",
+      "[minute 420; recorded observation; quoted claims remain claims] Observed local state at el Mesón del Puente (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 600; recorded observation; quoted claims remain claims] Observed local state at la plaza del mercado (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn."
+    ],
+    "desireEvidence": [
+      {
+        "id": 1,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.arrive",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal arrived on the boat.",
+        "importance": 0.5,
+        "place": "harbor"
+      },
+      {
+        "id": 4,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.plan",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal set out to find a place to belong in this town",
+        "importance": 0.15,
+        "place": "harbor",
+        "payload": {
+          "goals": [
+            "Find a place to belong in this town",
+            "Learn the local gossip and who's who",
+            "Secure a way to earn coins"
+          ],
+          "mood": "Curious and hopeful, a bit tired from the journey"
+        }
+      },
+      {
+        "id": 5,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to el Mesón del Puente.",
+        "importance": 0.02,
+        "place": "inn"
+      },
+      {
+        "id": 8,
+        "t": 420,
+        "day": 1,
+        "kind": "action.rejected",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal tried to trade but shop is elsewhere.",
+        "importance": 0.05,
+        "place": "inn",
+        "payload": {
+          "action": {
+            "kind": "trade",
+            "with": "the inn's keeper",
+            "coins": 0
+          },
+          "source": "tier 2: a crossroads"
+        }
+      },
+      {
+        "id": 12,
+        "t": 480,
+        "day": 1,
+        "kind": "agent.trade",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal bought soup for 2.",
+        "importance": 0.02,
+        "place": "inn",
+        "payload": {
+          "because": "Buy a bowl of soup at the inn to eat and quiet my hunger."
+        }
+      },
+      {
+        "id": 16,
+        "t": 540,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to la plaza del mercado, on the way to la Casa del Concejo.",
+        "importance": 0.02,
+        "place": "market",
+        "payload": {
+          "because": "Walk to the market square to see who's about before the council gathering."
+        }
+      },
+      {
+        "id": 19,
+        "t": 600,
+        "day": 1,
+        "kind": "town.mayor",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "The council chose Inés Vidal as mayor: the person the island trusts most.",
+        "importance": 0.8,
+        "place": "council"
+      },
+      {
+        "id": 20,
+        "t": 600,
+        "day": 1,
+        "kind": "town.gathering",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "The council sat at la Casa del Concejo in front of 0; Inés Vidal is mayor.",
+        "importance": 0.9,
+        "place": "council",
+        "payload": {
+          "kind": "election",
+          "crowd": [],
+          "held": true
+        }
+      },
+      {
+        "id": 22,
+        "t": 600,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to la Casa del Concejo.",
+        "importance": 0.02,
+        "place": "council",
+        "payload": {
+          "because": "Walk to the council hall for the mayor's business."
+        }
+      },
+      {
+        "id": 24,
+        "t": 660,
+        "day": 1,
+        "kind": "agent.eat",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal ate soup.",
+        "importance": 0.01,
+        "place": "council"
+      },
+      {
+        "id": 27,
+        "t": 720,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to la plaza del mercado, on the way to el Horno de los Ibáñez.",
+        "importance": 0.02,
+        "place": "market"
+      },
+      {
+        "id": 30,
+        "t": 780,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to el Horno de los Ibáñez.",
+        "importance": 0.02,
+        "place": "bakery"
+      },
+      {
+        "id": 33,
+        "t": 840,
+        "day": 1,
+        "kind": "action.rejected",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal tried to trade but shop is elsewhere.",
+        "importance": 0.05,
+        "place": "bakery",
+        "payload": {
+          "action": {
+            "kind": "trade",
+            "with": "bakery.cook",
+            "coins": 0
+          },
+          "source": "tier 1: job here"
+        }
+      },
+      {
+        "id": 37,
+        "t": 900,
+        "day": 1,
+        "kind": "action.rejected",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal tried to trade but shop is elsewhere.",
+        "importance": 0.05,
+        "place": "bakery",
+        "payload": {
+          "action": {
+            "kind": "trade",
+            "with": "bakery.cook",
+            "buy": "bread",
+            "coins": 0
+          },
+          "source": "tier 1: job here"
+        }
+      },
+      {
+        "id": 38,
+        "t": 900,
+        "day": 1,
+        "kind": "conversation",
+        "actors": [
+          "ag_2",
+          "ag_1"
+        ],
+        "text": "Pedro Ibáñez and Inés Vidal talked at el Horno de los Ibáñez. Pedro Ibáñez: “Pedro, you're back at the horno. I heard the council made Inés mayor—you know anything about that?” Inés Vidal: “I was there. She's got the treasury now, but that ",
+        "importance": 0.5700000000000001,
+        "place": "bakery",
+        "payload": {
+          "lines": [
+            {
+              "speaker": "ag_2",
+              "text": "Pedro, you're back at the horno. I heard the council made Inés mayor—you know anything about that?"
+            },
+            {
+              "speaker": "ag_1",
+              "text": "I was there. She's got the treasury now, but that don't feed nobody. You still baking with that cheap flour from the harbor?"
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Aye, and losing coins on every sack. But I need bread to sell, or the horno closes. You got a better price?"
+            },
+            {
+              "speaker": "ag_1",
+              "text": "Maybe I know a miller up the river who'd trade for a favor, but I ain't promising nothing. You want me to ask around?"
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Ask. If he's fair, I'll take a load next week. Just don't tell my wife I'm bartering—she thinks I'm buying proper."
+            }
+          ]
+        }
+      },
+      {
+        "id": 40,
+        "t": 960,
+        "day": 1,
+        "kind": "action.rejected",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal tried to trade but shop is elsewhere.",
+        "importance": 0.05,
+        "place": "bakery",
+        "payload": {
+          "action": {
+            "kind": "trade",
+            "with": "bakery.cook",
+            "buy": "bread",
+            "coins": 0
+          },
+          "source": "tier 2: a crossroads"
+        }
+      },
+      {
+        "id": 43,
+        "t": 1020,
+        "day": 1,
+        "kind": "action.rejected",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal tried to trade but shop is elsewhere.",
+        "importance": 0.05,
+        "place": "bakery",
+        "payload": {
+          "action": {
+            "kind": "trade",
+            "with": "bakery.cook",
+            "coins": 0
+          },
+          "source": "tier 1: job here"
+        }
+      },
+      {
+        "id": 47,
+        "t": 1080,
+        "day": 1,
+        "kind": "agent.say",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal: “Pedro, I'll go look for that miller come morning. For now, let me buy a loaf so I'm not starving before I do.”",
+        "importance": 0.15,
+        "place": "bakery",
+        "payload": {
+          "because": "Speak to Pedro and buy bread to eat tonight."
+        }
+      },
+      {
+        "id": 49,
+        "t": 1140,
+        "day": 1,
+        "kind": "agent.trade",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal bought bread for 1.",
+        "importance": 0.02,
+        "place": "bakery"
+      },
+      {
+        "id": 52,
+        "t": 1200,
+        "day": 1,
+        "kind": "agent.eat",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal ate bread.",
+        "importance": 0.01,
+        "place": "bakery"
+      },
+      {
+        "id": 53,
+        "t": 1260,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to la plaza del mercado.",
+        "importance": 0.02,
+        "place": "market"
+      },
+      {
+        "id": 55,
+        "t": 1320,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to el Mesón del Puente.",
+        "importance": 0.02,
+        "place": "inn"
+      },
+      {
+        "id": 57,
+        "t": 1380,
+        "day": 1,
+        "kind": "agent.sleep",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Inés Vidal went to sleep at el Mesón del Puente.",
+        "importance": 0.01,
+        "place": "inn"
+      }
+    ]
+  }
+}

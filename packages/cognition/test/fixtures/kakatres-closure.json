@@ -1,0 +1,284 @@
+{
+  "source": "apps/headless/out/openrouter-deepseek-Kakatres",
+  "method": "Exact local run.log completions and events. No original request body is claimed; integration tests construct explicit counterfactual state from engine fixtures.",
+  "cases": [
+    {
+      "callId": "3d246c4a",
+      "attempt": 1,
+      "agentId": "ag_2",
+      "generationId": "gen-1789773447-N96QPdoUw508DYNoXqJr",
+      "line": 27,
+      "output": {
+        "action": {
+          "kind": "apply",
+          "job": "cook at the bakery"
+        },
+        "intent": "Walking to the bakery to ask Ilić if I can take the cook shift, since today is Sunday and no shifts run, but I can still request the job for tomorrow.",
+        "remember": [
+          "I arrived on the island today with a suitcase and 40 coins, and have three nights paid at the inn.",
+          "It is Sunday, so no wage work is available today, but I can apply for the bakery cook position.",
+          "I meant to find steady baking work at Ilić's bakery using local flour from the mill."
+        ],
+        "desire_id": ""
+      }
+    },
+    {
+      "callId": "3d246c4a",
+      "attempt": 2,
+      "agentId": "ag_2",
+      "generationId": "gen-1789773448-U4WIWbZRZ544ZO4Yf3WL",
+      "line": 32,
+      "output": {
+        "action": {
+          "kind": "apply",
+          "job": "cook at the bakery"
+        },
+        "intent": "Walking to the bakery to ask Ilić if I can take the cook shift, since today is Sunday and no shifts run, but I can still request the job for tomorrow.",
+        "remember": []
+      }
+    },
+    {
+      "callId": "3de32c50",
+      "attempt": 1,
+      "agentId": "ag_2",
+      "generationId": "gen-1789773630-2IyQ4jFqHg7WuEzB86bT",
+      "line": 337,
+      "output": {
+        "action": {
+          "kind": "buy",
+          "item": "bread",
+          "with": "inn"
+        },
+        "intent": "I'll buy bread at the inn to eat now, since I'm hungry and need strength for the day ahead."
+      }
+    },
+    {
+      "callId": "3de32c50",
+      "attempt": 2,
+      "agentId": "ag_2",
+      "generationId": "gen-1789773632-8PSK07QfqV7xYTBlAagG",
+      "line": 344,
+      "output": {
+        "action": {
+          "kind": "trade",
+          "with": "inn",
+          "buy": "bread"
+        },
+        "intent": "I'll buy bread at the inn to eat now, since I'm hungry and need strength for the day ahead.",
+        "remember": []
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": 10,
+      "t": 420,
+      "day": 1,
+      "kind": "agent.hired",
+      "actors": [
+        "ag_2"
+      ],
+      "text": "Petar Ilić was taken on as dock hand.",
+      "importance": 0.5,
+      "place": "harbor",
+      "payload": {
+        "because": "Walking to the bakery to ask Ilić if I can take the cook shift, since today is Sunday and no shifts run, but I can still request the job for tomorrow."
+      }
+    },
+    {
+      "id": 96,
+      "t": 1980,
+      "day": 2,
+      "kind": "agent.say",
+      "actors": [
+        "ag_2",
+        "ag_3"
+      ],
+      "text": "Petar Ilić to Ivana Horvat: “The boat was late again.”",
+      "importance": 0.15,
+      "place": "inn"
+    }
+  ],
+  "boatEventsBeforeFallback": [
+    {
+      "id": 8,
+      "t": 420,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 07:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 12,
+      "t": 480,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 08:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 17,
+      "t": 540,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 09:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 23,
+      "t": 600,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 10:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 30,
+      "t": 660,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 11:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 34,
+      "t": 720,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 12:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 38,
+      "t": 780,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 13:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 42,
+      "t": 840,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 14:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 46,
+      "t": 900,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 15:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 50,
+      "t": 960,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 16:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 54,
+      "t": 1020,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 17:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 58,
+      "t": 1080,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 18:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 62,
+      "t": 1140,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 19:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 66,
+      "t": 1200,
+      "day": 1,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 20:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 77,
+      "t": 1800,
+      "day": 2,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 06:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 81,
+      "t": 1860,
+      "day": 2,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 07:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 90,
+      "t": 1920,
+      "day": 2,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 08:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    },
+    {
+      "id": 95,
+      "t": 1980,
+      "day": 2,
+      "kind": "boat.dock",
+      "actors": [],
+      "text": "The 09:00 boat docked.",
+      "importance": 0.03,
+      "place": "harbor"
+    }
+  ]
+}

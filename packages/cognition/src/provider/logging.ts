@@ -29,8 +29,10 @@ export class OpenRouterLogger {
 
   emit(event: string, trace: CallTrace, fields: Record<string, unknown> = {}): void {
     try {
-      if (this.content) this.log(`openrouter ${event} ${JSON.stringify({ at: new Date().toISOString(), ...trace, ...fields })}`);
-      else this.log(`[LLM ${new Date().toLocaleTimeString("es-AR", { hour12: false })} ${trace.agentId ?? "pueblo"} ${trace.callId.slice(0, 8)}] ${trace.kind} | ${readableEvent(event, fields, trace)}`);
+      const dialogue = acceptedDialogue(event, trace, fields);
+      const details = dialogue ? { ...fields, dialogue } : fields;
+      if (this.content) this.log(`openrouter ${event} ${JSON.stringify({ at: new Date().toISOString(), ...trace, ...details })}`);
+      else this.log(`[LLM ${new Date().toLocaleTimeString("en-GB", { hour12: false })} ${trace.agentId ?? "town"} ${trace.callId.slice(0, 8)}] ${trace.kind} | ${readableEvent(event, details, trace)}`);
     }
     catch { /* Serializing diagnostics must not fail a valid model response. */ }
   }
@@ -87,32 +89,49 @@ const brief = (value: unknown, limit = 180): string => {
   return text.length > limit ? text.slice(0, limit - 1) + "…" : text;
 };
 const record = (value: unknown): Record<string, unknown> => value && typeof value === "object" ? value as Record<string, unknown> : {};
+function acceptedDialogue(event: string, trace: CallTrace, fields: Record<string, unknown>): { speaker: string; text: string }[] | null {
+  if (event !== "validation" || fields.status !== "accepted" || trace.kind !== "dialogue") return null;
+  const lines: unknown = record(fields.value).lines;
+  if (!Array.isArray(lines) || !lines.length || !lines.every(line => typeof record(line).speaker === "string" && typeof record(line).text === "string")) return null;
+  return lines.map(line => ({ speaker: line.speaker as string, text: line.text as string }));
+}
 const number = (value: unknown) => typeof value === "number" ? String(value) : "?";
-const cost = (value: unknown) => typeof value === "number" ? `$${value.toFixed(6)}` : "coste desconocido";
+const cost = (value: unknown) => typeof value === "number" ? `$${value.toFixed(6)}` : "unknown cost";
 
-/** Summaries only: never serialize a prompt, schema or full provider payload here. */
+/** Preserve the entire completion, including rejected/truncated text. */
+function completionBlock(value: unknown): string {
+  if (typeof value !== "string") return "(no content)";
+  if (!value.length) return "(empty)";
+  try { return JSON.stringify(JSON.parse(value)); }
+  catch { return JSON.stringify(value); } // Lossless escaped string, including incomplete JSON.
+}
+
+/** Concise metadata plus full completion; never print prompts or provider envelopes. */
 function readableEvent(event: string, fields: Record<string, unknown>, trace: CallTrace): string {
   switch (event) {
-    case "request": return `consultando ${trace.model} · intento ${fields.attempt ?? (trace as Partial<AttemptTrace>).attempt ?? 1}/${(trace as Partial<AttemptTrace>).httpAttempt ?? 1}`;
-    case "response": return `${fields.provider ?? "proveedor desconocido"} · tokens ${number(fields.prompt)} entrada / ${number(fields.completion)} salida · caché ${number(fields.cached)} · ${cost(fields.costUsd)} · ${typeof fields.durationMs === "number" ? (fields.durationMs / 1000).toFixed(1) + "s" : "?"} · fin=${fields.finishReason ?? "?"}${fields.error ? ` · error: ${brief(fields.error)}` : ""}`;
+    case "request": return `calling ${trace.model} · attempt ${fields.attempt ?? (trace as Partial<AttemptTrace>).attempt ?? 1} · HTTP ${(trace as Partial<AttemptTrace>).httpAttempt ?? 1}`;
+    case "response": return `${fields.provider ?? "unknown provider"} · tokens ${number(fields.prompt)} input / ${number(fields.completion)} output · cache ${number(fields.cached)} · ${cost(fields.costUsd)} · ${typeof fields.durationMs === "number" ? (fields.durationMs / 1000).toFixed(1) + "s" : "?"} · finish=${fields.finishReason ?? "?"}${fields.error ? ` · error: ${brief(fields.error)}` : ""} · Completion (attempt ${(trace as Partial<AttemptTrace>).attempt ?? 1}, id=${fields.id ?? "unknown"}): ${completionBlock(fields.completionText)}`;
     case "validation": {
+      if (fields.status === "normalized") return `normalized optional fields: ${brief(fields.fields)} · ${fields.reason ?? "validation continues"}`;
       if (fields.status !== "accepted") {
         const issue = record(fields.issue);
-        return `rechazado (${fields.status})${issue.code ? ` · ${issue.code}` : ""}${issue.message ? `: ${brief(issue.message)}` : ""} · ${fields.willRetry ? "se repara" : "sin más reintentos"}`;
+        return `rejected (${fields.status})${issue.code ? ` · ${issue.code}` : ""}${issue.message ? `: ${brief(issue.message)}` : ""} · ${fields.willRetry ? "repairing" : "no retries left"}`;
       }
+      if (fields.dialogue) return `dialogue=${JSON.stringify(fields.dialogue)} · accepted by cognition; execution not yet confirmed`;
       const value = record(fields.value);
       const lead = record(value.lead);
       const summary = value.action ?? value.summary ?? lead.headline ?? value.headline ?? value.goals ?? value.text ?? value.title
-        ?? (Array.isArray(value.lines) ? `diálogo: ${value.lines.length} intervenciones` : "respuesta válida");
-      return `${value.action ? "propuesta válida" : "respuesta válida"}: ${brief(summary, 240)}${value.intent ? ` · motivo: ${brief(value.intent, 140)}` : ""}${Array.isArray(value.remember) && value.remember.length ? ` · recuerdos: ${value.remember.length}` : ""}`;
+        ?? (Array.isArray(value.lines) ? `dialogue: ${value.lines.length} lines` : "valid response");
+      return `${value.action ? "valid proposal" : "valid response"}: ${brief(summary, 240)}${value.intent ? ` · reason: ${brief(value.intent, 140)}` : ""}${Array.isArray(value.remember) && value.remember.length ? ` · memories: ${value.remember.length}` : ""}`;
     }
     case "generation": {
       const m = record(fields.metadata);
-      return `OpenRouter confirmado · nativos ${number(m.native_tokens_prompt)}/${number(m.native_tokens_completion)} · caché ${number(m.native_tokens_cached)} · ${cost(m.total_cost)} · id=${fields.id}`;
+      return `OpenRouter confirmed · native ${number(m.native_tokens_prompt)}/${number(m.native_tokens_completion)} · cache ${number(m.native_tokens_cached)} · ${cost(m.total_cost)} · id=${fields.id}`;
     }
-    case "generation_unavailable": return `metadata no disponible (${fields.reason}) · id=${fields.id ?? "desconocido"}`;
-    case "http_error": return `error HTTP ${fields.status}`;
-    case "transport_error": return `error de conexión: ${brief(fields.reason)}`;
+    case "generation_unavailable": return `metadata unavailable (${fields.reason}) · id=${fields.id ?? "unknown"}`;
+    case "repair_comparison": return `repair: ${fields.status} · fields: ${brief(fields.changed)}`;
+    case "http_error": return `HTTP error ${fields.status}`;
+    case "transport_error": return `connection error: ${brief(fields.reason)}`;
     default: return event;
   }
 }

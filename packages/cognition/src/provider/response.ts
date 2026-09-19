@@ -40,7 +40,16 @@ export function repairNote(issue: { path: PropertyKey[]; message: string; code?:
   }
   return `Your answer did not fit the schema: ${path}: ${issue.message}. Return the same answer corrected to fit, as JSON only.`;
 }
+/** Report known schema failures together within the existing repair budget. */
+export function schemaRepairNote(issues: Parameters<typeof repairNote>[0][], raw: unknown): string {
+  // Unknown aliases must not crowd missing required fields/limits out of the
+  // bounded repair. Reflection's field guide also names prohibited aliases.
+  const ordered = [...issues].sort((a, b) => Number(a.code === "unrecognized_keys") - Number(b.code === "unrecognized_keys"));
+  const notes = ordered.slice(0, 12).map(issue => repairNote(issue, raw));
+  if (issues.some(issue => issue.path[0] === "desires")) notes.push("For a new desire omit id; for an existing desire copy its supplied string ID, not a numeric index. Each update needs 1-3 supplied personal event IDs. Omit an unsupported update rather than inventing evidence.");
+  return notes.join("\n");
+}
+
 /** A fallback answer wears a mark ops can see without the shape changing: the flag is not enumerable, so it never reaches the record. */
 export function markFallback<T extends object>(x: T): T { Object.defineProperty(x, "fromFallback", { value: true, enumerable: false, configurable: true }); return x; }
 export const isFromFallback = (x: unknown): boolean => !!x && typeof x === "object" && (x as { fromFallback?: boolean }).fromFallback === true;
-

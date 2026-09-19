@@ -8,7 +8,7 @@ export const normalize = (text: string): string => text.normalize("NFKC").toLoca
 export function outputQualityIssue(value: unknown, path = ""): SemanticIssue | null {
   if (typeof value === "string") {
     const words = normalize(value).match(/[\p{L}\p{N}_]+/gu) ?? [];
-    // At least 12 tokens repeating a unit of up to 4 words, e.g. "que" or "I will".
+    // At least 12 tokens repeating a unit of up to 4 words, e.g. "that" or "I will".
     for (let width = 1; width <= 4; width++) {
       let run = width;
       for (let i = width; i < words.length; i++) {
@@ -27,5 +27,5 @@ export function outputQualityIssue(value: unknown, path = ""): SemanticIssue | n
 
 /** Invalid output is never replayed: especially not repetition loops or fake memories. */
 export function semanticRepairNote(issue: SemanticIssue): string {
-  return `Semantic error at ${issue.path}: ${issue.message} Reconsider the answer using current evidence; return corrected JSON. The previous proposal was NOT executed. Preserve deliberate personal choices, not misunderstandings of actions.`;
+  return `Semantic error at ${issue.path}: ${issue.message} Reconsider the answer using current evidence; return corrected JSON. The previous proposal was NOT executed. Preserve deliberate personal choices, not misunderstandings of actions. Do not strengthen a state into an event or invent a cause while repairing: prepaid nights do not mean I paid for lodging; wages received are not money paid out. Every new physical assertion still needs its own receipt.`;
 }

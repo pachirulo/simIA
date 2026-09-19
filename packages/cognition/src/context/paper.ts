@@ -11,7 +11,7 @@ export function publicPaperContext(ctx: PaperContext): PaperContext {
 }
 
 export function paperRecords(events: PaperContext["events"]): string {
-  const reported = (event: PaperContext["events"][number]) => / talked at | said(?: to |:)| told | rumor|dicen que/iu.test(event.text)
+  const reported = (event: PaperContext["events"][number]) => / talked at | said(?: to |:)| told | rumor/iu.test(event.text)
     || event.actors.some(actor => event.text.startsWith(`${actor}: “`) || event.text.startsWith(`${actor}: "`)
       || (event.text.startsWith(`${actor} to `) && /: [“"]/.test(event.text)));
   const facts = events.filter(event => !reported(event));

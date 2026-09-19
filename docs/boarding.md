@@ -1,5 +1,7 @@
 # Boarding readiness
 
+Write character backgrounds, motivations and voice samples in English; proper names retain their original spelling. Cognition generates English prose and uses English semantic checks. There is no automatic translation of submitted text or existing saved characters.
+
 Character design is free and saved as a browser draft. New citizens do not enter the live town until the server verifies their brain:
 
 - Hosted: the wallet plan must match an active or trialing Stripe subscription. Local billing test mode accepts its simulated plan. Checkout returns to `/board`; a redirect alone never authorizes admission. Existing manual plan assignments without a Stripe subscription do not qualify for new hosted boarding.

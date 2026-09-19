@@ -47,6 +47,13 @@ pnpm soak -- --days 10 --agents 20 --brain mock --seed 7 --tick 1
 
 Then read `apps/headless/out/gazette-day*.md`, one newspaper per day. Somebody usually builds a house by day eight.
 
+Each soak also saves `events.jsonl`, speech-only `dialogue.jsonl`, diagnostics in
+`run.log` (including every world event), and completion/error status in `run.json`.
+JSON records and model completions are compact, one record per line; embedded
+newlines remain escaped without losing their content. Headless prints the absolute
+output directory when it starts. Use a fresh `--out out/run-name` for each run;
+existing artifacts are protected from overwriting. [Log files and diagnostics](docs/openrouter-console-logs.md).
+
 ## The first morning
 
 This is the record of a fresh island with real minds, from the morning the film above was shot. Every line is an event the engine emitted, in the words the Gazette prints, and none of it was written by a person.
@@ -123,6 +130,8 @@ Most minutes cost nothing, because habit walks people to work, to food and to be
 | `apps/headless` | the soak: days of the island with no client, for CI and for reading. |
 
 See [the cognition architecture](docs/cognition-architecture.md) for operation contexts, provider boundaries, compatibility, caching and the reproducible context-size comparison.
+
+Plan y seguimiento: [coherencia de decisiones, reparaciones y memoria sin modificar el engine](docs/cognition-coherence-plan-2026-09-18.md).
 
 ## What the island does
 

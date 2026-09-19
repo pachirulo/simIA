@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { ActionProposal } from "@unwatched/protocol";
+import { ActionProposal, Dialogue } from "@unwatched/protocol";
 import { OpenRouterProvider } from "../src/provider/openrouter.ts";
 import { OpenRouterLogger } from "../src/provider/logging.ts";
 
@@ -11,17 +11,44 @@ const metadata = { id: "gen-test", model: "deepseek/deepseek-v4-flash-20260731",
   native_tokens_reasoning: 0, latency: 500, generation_time: 1200, total_cost: .0002, cache_discount: .0001,
   streamed: false, cancelled: false, finish_reason: "stop", native_finish_reason: "stop",
   provider_responses: [{ provider_name: "First", status: 429 }, { provider_name: "Test provider", status: 200 }] };
-const completion = (id = "gen-test", content = '{"text":"Llegué al mesón."}') => ({
+const completion = (id = "gen-test", content = '{"text":"I arrived at the inn."}') => ({
   id, model, provider: "Test provider", choices: [{ finish_reason: "stop", message: { role: "assistant", content } }],
   usage: { prompt_tokens: 6000, completion_tokens: 50, total_tokens: 6050, cost: .0002,
     prompt_tokens_details: { cached_tokens: 4000 }, completion_tokens_details: { reasoning_tokens: 0 } },
 });
 const json = (value: unknown) => new Response(JSON.stringify(value));
 function events(lines: string[], name: string) { return lines.filter(line => line.startsWith(`openrouter ${name} `)).map(line => JSON.parse(line.slice(`openrouter ${name} `.length))); }
-const call = (provider: OpenRouterProvider) => provider.call("day_plan", model, "routine", { shared: "Reglas físicas", own: "Soy Inés." }, "Percepción: café y pan.", schema, 500, "ag_1");
+const call = (provider: OpenRouterProvider) => provider.call("day_plan", model, "routine", { shared: "Physical rules", own: "I am Inés." }, "Perception: coffee and bread.", schema, 500, "ag_1");
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.useRealTimers(); });
 
 describe("OpenRouter console diagnostics", () => {
+  it.each([true, false])("adds a dialogue-only field to accepted conversations (JSON=%s), preserving full speech", async logContent => {
+    const lines: string[] = [];
+    const spoken = [{ speaker: "Inés", text: "Did you bring the bread?\nI am waiting for it." }, { speaker: "Pedro", text: "Not yet. First I need to go to the mill and ask whether any flour is available. When I return I will tell you what I found; I do not want to promise a delivery I cannot guarantee yet. If the miller has what we need, we can discuss the price and agree on when I should stop by the inn." }];
+    const out = { lines: spoken, outcome: { a_trust_delta: 0, b_trust_delta: 0, a_remember: "PRIVATE MEMORY", b_remember: "", rumor: null } };
+    const fetch = vi.fn(async () => json(completion("gen-dialogue", JSON.stringify(out)))); vi.stubGlobal("fetch", fetch);
+    const provider = new OpenRouterProvider({ apiKey: "test", logContent, logGeneration: false, log: line => lines.push(line) });
+    expect(await provider.call("dialogue", model, "routine", { shared: "rules" }, "state", Dialogue, 1500, "a")).toEqual(out);
+    if (logContent) expect(events(lines, "validation")[0].dialogue).toEqual(spoken);
+    else {
+      const dialogueLine = lines.find(line => line.includes("dialogue="))!;
+      expect(dialogueLine).toContain(JSON.stringify(spoken));
+      expect(dialogueLine).not.toContain("PRIVATE MEMORY");
+      expect(dialogueLine).toContain("execution not yet confirmed");
+    }
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not expose rejected candidates or reflections as accepted dialogue", () => {
+    const lines: string[] = [];
+    const logger = new OpenRouterLogger("test", l => lines.push(l), { logContent: true, logGeneration: false });
+    const trace = { callId: "call", agentId: "a", kind: "dialogue" as const, model, slot: "routine" as const };
+    const value = { lines: [{ speaker: "a", text: "Unverified" }] };
+    logger.emit("validation", trace, { status: "semantic_mismatch", value });
+    logger.emit("validation", { ...trace, kind: "reflection" }, { status: "accepted", value });
+    expect(events(lines, "validation").every(e => !("dialogue" in e))).toBe(true);
+  });
+
   it("logs full wire request/response and correlates asynchronous API metadata without delaying decisions or billing twice", async () => {
     const lines: string[] = [], posted: unknown[] = [];
     let release!: (response: Response) => void;
@@ -35,11 +62,11 @@ describe("OpenRouter console diagnostics", () => {
     }));
     const provider = new OpenRouterProvider({ apiKey: "PRIVATE_TEST_KEY", logContent: true, log: line => lines.push(line) });
     const usage = vi.fn(); provider.onUsage = usage;
-    expect(await call(provider)).toEqual({ text: "Llegué al mesón." });
+    expect(await call(provider)).toEqual({ text: "I arrived at the inn." });
     expect(events(lines, "generation")).toHaveLength(0);
     expect(events(lines, "request")[0].body).toEqual(posted[0]);
     expect(events(lines, "response")[0]).toMatchObject({ agentId: "ag_1", id: "gen-test", slot: "routine", durationMs: expect.any(Number), response: completion() });
-    expect(events(lines, "validation")[0]).toMatchObject({ id: "gen-test", status: "accepted", value: { text: "Llegué al mesón." } });
+    expect(events(lines, "validation")[0]).toMatchObject({ id: "gen-test", status: "accepted", value: { text: "I arrived at the inn." } });
     release(json({ data: metadata })); await provider.flushLogs();
     expect(events(lines, "generation")[0]).toMatchObject({ id: "gen-test", metadata });
     const correlated = ["request", "response", "validation", "generation"].map(event => events(lines, event)[0].callId);
@@ -85,7 +112,7 @@ describe("OpenRouter console diagnostics", () => {
       return ++get === 1 ? new Response("not indexed", { status: 404 }) : json({ data: metadata });
     }));
     const provider = new OpenRouterProvider({ apiKey: "test", logContent: true, log: line => lines.push(line) });
-    expect(await call(provider)).toEqual({ text: "Llegué al mesón." });
+    expect(await call(provider)).toEqual({ text: "I arrived at the inn." });
     const drain = provider.flushLogs(); await vi.advanceTimersByTimeAsync(1000); await drain;
     expect(posts).toBe(1); expect(get).toBe(2); expect(events(lines, "generation")).toHaveLength(1);
   });
@@ -97,7 +124,7 @@ describe("OpenRouter console diagnostics", () => {
       reads++; return new Response("unavailable", { status });
     }));
     const fallback = vi.fn(), provider = new OpenRouterProvider({ apiKey: "test", logContent: true, log: line => lines.push(line) }); provider.onFallback = fallback;
-    expect(await call(provider)).toEqual({ text: "Llegué al mesón." });
+    expect(await call(provider)).toEqual({ text: "I arrived at the inn." });
     const drain = provider.flushLogs(); await vi.runAllTimersAsync(); await drain;
     expect(reads).toBe(status === 403 ? 1 : 4);
     expect(events(lines, "generation_unavailable")[0]).toMatchObject({ id: "gen-test", reason: `http_${status}` });
@@ -113,39 +140,55 @@ describe("OpenRouter console diagnostics", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it("defaults to readable decisions and metrics without prompts or full payloads", async () => {
+  it("shows complete completions by default without prompts or provider envelopes", async () => {
     vi.stubEnv("UW_OR_LOG_CONTENT", undefined); vi.stubEnv("UW_OR_LOG_GENERATION", "0");
     const lines: string[] = [];
-    const raw = { action: { kind: "trade", buy: "bread", sell: "" }, intent: "Tengo hambre", remember: [] };
+    const raw = { action: { kind: "trade", buy: "bread", sell: "" }, intent: "I am hungry", remember: ["I saw the bakery selling bread for 1 coin.", "The council gathers at the Council House at 10:00.", "I need to find the mill after looking around."] };
     const fetch = vi.fn(async () => json(completion("gen-readable", JSON.stringify(raw)))); vi.stubGlobal("fetch", fetch);
     const provider = new OpenRouterProvider({ apiKey: "test", log: line => lines.push(line) });
     await provider.call("action_proposal", model, "routine", { shared: "PRIVATE_SYSTEM_PROMPT" }, "PRIVATE_PERCEPTION", ActionProposal, 500, "ag_1");
     await provider.flushLogs();
     const text = lines.join("\n");
-    expect(text).toContain("ag_1"); expect(text).toContain('propuesta válida: {"kind":"trade","buy":"bread"}');
-    expect(text).toContain("motivo: Tengo hambre"); expect(text).toContain("6000 entrada / 50 salida");
-    expect(text).toContain("caché 4000"); expect(text).toContain("$0.000200");
+    expect(text).toContain("ag_1"); expect(text).toContain('valid proposal: {"kind":"trade","buy":"bread"}');
+    expect(text).toContain("reason: I am hungry"); expect(text).toContain("6000 input / 50 output");
+    expect(text).toContain("cache 4000"); expect(text).toContain("$0.000200");
     expect(text).not.toContain("PRIVATE_"); expect(text).not.toContain("response_format"); expect(text).not.toContain("choices");
-    expect(lines.every(line => line.length < 400)).toBe(true); expect(fetch).toHaveBeenCalledTimes(1);
+    expect(text).toContain(JSON.stringify(raw));
+    expect(lines.every(line => !line.includes("\n"))).toBe(true);
+    expect(text).toContain('Completion (attempt 1, id=gen-readable):');
+    expect(text).toContain('"sell":""'); // Raw completion, before normalization.
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves invalid or truncated completions in readable mode", () => {
+    const lines: string[] = [];
+    const logger = new OpenRouterLogger("test", line => lines.push(line), { logContent: false });
+    const trace = { callId: "call", agentId: "a", kind: "action_proposal" as const, model, slot: "routine" as const, attempt: 2, httpAttempt: 1 };
+    const broken = '{\n"action": {"kind": "move", "to": "mar';
+    logger.emit("response", trace, { id: "gen-broken", finishReason: "length", completionText: broken });
+    expect(lines[0]).toContain("Completion (attempt 2, id=gen-broken):");
+    expect(lines[0]!.endsWith(JSON.stringify(broken))).toBe(true);
+    expect(lines[0]).not.toContain("\n");
+    expect(JSON.parse(lines[0]!.split("id=gen-broken): ")[1]!)).toBe(broken);
   });
 
   it("bounds long results and makes repair errors readable", () => {
     const lines: string[] = [];
     const logger = new OpenRouterLogger("test", line => lines.push(line), { logContent: false });
     const trace = { callId: "call", agentId: "a", kind: "reflection" as const, model, slot: "reflect" as const };
-    logger.emit("validation", trace, { status: "accepted", value: { summary: "Una reflexión muy larga. ".repeat(200) } });
-    logger.emit("validation", trace, { status: "semantic_mismatch", issue: { code: "sell_not_carried", message: "No lleva ese objeto." }, willRetry: true });
+    logger.emit("validation", trace, { status: "accepted", value: { summary: "A very long reflection. ".repeat(200) } });
+    logger.emit("validation", trace, { status: "semantic_mismatch", issue: { code: "sell_not_carried", message: "That item is not carried." }, willRetry: true });
     logger.emit("generation", trace, { id: "gen-readable", metadata });
     expect(lines[0]).toContain("…"); expect(lines[0]!.length).toBeLessThan(350);
-    expect(lines[1]).toContain("sell_not_carried: No lleva ese objeto. · se repara");
-    expect(lines[2]).toContain("nativos 6000/50"); expect(lines[2]).toContain("gen-readable");
+    expect(lines[1]).toContain("sell_not_carried: That item is not carried. · repairing");
+    expect(lines[2]).toContain("native 6000/50"); expect(lines[2]).toContain("gen-readable");
     expect(lines[2]).not.toContain("provider_responses");
   });
 
   it("ignores a broken console sink instead of failing or retrying a billable decision", async () => {
     const fetch = vi.fn(async () => json(completion())); vi.stubGlobal("fetch", fetch);
     const provider = new OpenRouterProvider({ apiKey: "test", logGeneration: false, log: () => { throw new Error("closed console"); } });
-    expect(await call(provider)).toEqual({ text: "Llegué al mesón." });
+    expect(await call(provider)).toEqual({ text: "I arrived at the inn." });
     expect(fetch).toHaveBeenCalledTimes(1); expect(provider.usage().calls).toBe(1);
   });
 

@@ -25,23 +25,23 @@ describe("operation contexts", () => {
     expect(buildDecideContext({ ...p, self: { ...p.self, family: { partner: "Tomás", children: [] } } }, a).user).toContain(WORLD_RULES.family);
     expect(buildDecideContext({ ...p, options: [...p.options, "search"] }, a).user).toContain(WORLD_RULES.secrets);
   });
-  it("preserves the legacy WORLD composition byte for byte for the direct Anthropic adapter and measurement baseline", () => {
-    expect(createHash("sha256").update(WORLD).digest("hex")).toBe("b6288e82d27300006d61e5135fbd85fde1086a91fa2f56f4a8d45931cd775ad7");
+  it("keeps the shared English WORLD composition stable for the direct Anthropic adapter", () => {
+    expect(createHash("sha256").update(WORLD).digest("hex")).toBe("73a03edec3282fafe8503ca53b366c1a892e8326f574fe5f283fe5cc1afbdf08");
   });
 
   it("keeps every dynamic perception field and the entire persona, without modifying the inputs", () => {
     const { a, b, perception: p } = contexts();
-    p.hint = "Mirá el muelle"; p.crossroads = "Una carta urgente";
-    p.owner_letters = [{ id: 7, text: "¿Llegaste bien?" }];
+    p.hint = "Look at the dock"; p.crossroads = "An urgent letter";
+    p.owner_letters = [{ id: 7, text: "Did you arrive safely?" }];
     p.self.food_advice = [{ from: b.id, name: "Tomás", place: "market", item: "bread", confidence: .6, source_t: 20, shared_t: 30, trust: .8, tested: false }];
     p.self.learned_food = [{ place: "market", item: "bread", confidence: .7, observations: 2 }];
-    p.self.deals = [{ id: 9, with: "Tomás", what: "Ayudar con la casa", coins: 3, mine: true, state: "open", due_in_days: 2, construction: { site: "lane-1", mornings: 2, done: 1 } }];
+    p.self.deals = [{ id: 9, with: "Tomás", what: "Help with the house", coins: 3, mine: true, state: "open", due_in_days: 2, construction: { site: "lane-1", mornings: 2, done: 1 } }];
     const before = structuredClone(p), agentBefore = structuredClone(a);
     const context = buildDecideContext(p, a);
     expect(JSON.parse(context.user.slice(context.user.lastIndexOf("\n\n") + 2))).toEqual(p);
     expect(Perception.parse(p)).toEqual(p);
     expect(context.system.own).toBe(personaBlock(a));
-    for (const text of ["Mirá el muelle", "Una carta urgente", "food_advice", "learned_food", "due_in_days"]) expect(context.user).toContain(text);
+    for (const text of ["Look at the dock", "An urgent letter", "food_advice", "learned_food", "due_in_days"]) expect(context.user).toContain(text);
     expect(p).toEqual(before); expect(a).toEqual(agentBefore);
   });
 
@@ -60,17 +60,18 @@ describe("operation contexts", () => {
     expect(ActionKind.options.every(kind => supported.has(kind))).toBe(true);
     for (const kind of ["offer", "accept", "refuse", "settle"]) {
       expect(ActionKind.safeParse(kind).success).toBe(false);
-      expect(actionProposalSchema(quiet).safeParse({ action: { kind, to: "neighbor", what: "Ayudar mañana" } }).success).toBe(true);
+      expect(actionProposalSchema(quiet).safeParse({ action: { kind, to: "neighbor", what: "Help tomorrow" } }).success).toBe(true);
     }
     expect(actionProposalSchema(quiet).safeParse({ action: { kind: "teleport" } }).success).toBe(false);
   });
 
-  it("preserves both sides of a conversation and only the memories supplied for this encounter", () => {
+  it("preserves public speakers and excludes individually supplied private context", () => {
     const { converse: ctx } = contexts();
     const built = buildConverseContext(ctx);
     expect(built.system.own).toBe(conversePrompt.system(ctx));
     expect(built.user).toBe(conversePrompt.user(ctx));
-    for (const text of [ctx.aToday!, ctx.bToday!, ...ctx.aMemories, ...ctx.bMemories, ...ctx.rumorsA, personaBlock(ctx.a), personaBlock(ctx.b)]) expect(built.user).toContain(text);
+    for (const text of [ctx.aToday!, ctx.bToday!, ...ctx.aMemories, ...ctx.bMemories, ...ctx.rumorsA, personaBlock(ctx.a), personaBlock(ctx.b)]) expect(built.user).not.toContain(text);
+    for (const name of [ctx.a.persona.name, ctx.b.persona.name]) expect(built.user).toContain(name);
     expect(built.system.own).toContain(ctx.observedPlace);
     expect(built.user).not.toContain("UNSELECTED_PRIVATE_MEMORY");
     expect(built.system.cacheOwn).toBeUndefined();

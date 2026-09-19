@@ -1,13 +1,15 @@
 import { z } from "zod";
+import { normalizeReflection, reflectionForDiagnostics, reflectionRepairFormat } from "../schema/reflection.ts";
 import { randomUUID } from "node:crypto";
 import type { CallKind, Slot } from "../model/router.ts";
 import type { SystemContext } from "../context/shared.ts";
 import { cleanSchema, strictSchema, stripNulls, wantsStrict } from "../schema/json.ts";
 import { compactActionSchema } from "../schema/compact.ts";
 import { normalizeOptionalStrings } from "../schema/normalize.ts";
-import { truncateProse, repairNote } from "./response.ts";
-import { outputQualityIssue, semanticRepairNote, type OutputCheck } from "../semantics/quality.ts";
+import { truncateProse, repairNote, schemaRepairNote } from "./response.ts";
+import { outputQualityIssue, type OutputCheck, type SemanticIssue } from "../semantics/quality.ts";
 import { OpenRouterLogger, safeLog, type CallTrace, type OpenRouterLoggingOptions } from "./logging.ts";
+import { anchoredRepairNote, repairAnchor, compareRepair, restoreRepairMetadata, type RepairAnchor, type RepairComparison } from "../semantics/repair.ts";
 
 export interface ProviderUsage { agentId: string | null; kind: CallKind; model: string; promptTokens: number; completionTokens: number; cachedTokens: number; costUsd: number | null; reasoningTokens?: number; finishReason?: string | null; provider?: string | null; generationId?: string | null; }
 
@@ -88,7 +90,7 @@ export class OpenRouterProvider {
           completion: data.usage?.completion_tokens ?? null, reasoning: data.usage?.completion_tokens_details?.reasoning_tokens ?? null,
           cached: data.usage?.prompt_tokens_details?.cached_tokens ?? null, costUsd: data.usage?.cost ?? null,
           usage: data.usage ?? null, error: data.error ?? null,
-          ...(this.diagnostics.content ? { response: data } : {}),
+          ...(this.diagnostics.content ? { response: data } : { completionText: data.choices?.[0]?.message?.content ?? null }),
         });
         this.diagnostics.enrich(trace, id);
         if (data.error || (finishReason !== null && !["stop", "length"].includes(finishReason))) {
@@ -121,6 +123,7 @@ export class OpenRouterProvider {
       provider: { require_parameters: true },
       response_format: { type: "json_schema", json_schema: { name, strict: true, schema: jsonSchema } } };
     const trace: CallTrace = { callId: randomUUID(), agentId, kind: name, model, slot };
+    let anchor: RepairAnchor | null = null;
     for (let attempt = 0; attempt < 2; attempt++) {
       const got = await this.post(body, model, name, slot, agentId, trace, attempt + 1); if (!got) return null;
       const validation = (status: string, details: Record<string, unknown> = {}) => this.diagnostics.emit("validation", trace, { id: got.id, attempt: attempt + 1, status, ...details });
@@ -135,22 +138,44 @@ export class OpenRouterProvider {
       let raw: unknown;
       try { raw = JSON.parse(text.trim().replace(/^```json\s*|```$/g, "")); }
       catch { validation("not_json", { willRetry: attempt === 0 }); this.log(`not json from ${model}${this.diagnostics.content ? `: ${text.slice(0, 80)}` : ""}`); if (attempt === 1) { this.onFallback?.({ what: name, model, reason: text.trim() ? "not json" : "no answer" }); return null; } if (text.trim()) messages.push({ role: "assistant", content: text }, { role: "user", content: "That was not a single JSON object. Return the same answer as JSON only, matching the schema." }); continue; } // an empty turn is refused by the providers, so an answer with nothing in it is simply asked again
-      const parsed = schema.safeParse(truncateProse(name, normalizeOptionalStrings(wantsStrict(model) ? stripNulls(raw) : raw, schema)));
+      const input = wantsStrict(model) ? stripNulls(raw) : raw;
+      const normalized = name === "reflection" ? normalizeReflection(input) : input;
+      if (normalized !== input) validation("normalized", { fields: ["self"], reason: "null optional self means no identity update" });
+      const parsed = schema.safeParse(restoreRepairMetadata(anchor, truncateProse(name, normalizeOptionalStrings(normalized, schema))));
       if (parsed.success) {
-        const semantic = outputQualityIssue(parsed.data) ?? check?.(parsed.data);
+        const transition: RepairComparison | null = anchor ? compareRepair(anchor, parsed.data) : null;
+        if (transition) this.diagnostics.emit("repair_comparison", trace, { attempt: attempt + 1, status: transition.status, changed: transition.changed });
+        const semantic: SemanticIssue | null | undefined = outputQualityIssue(parsed.data) ?? transition?.issue ?? check?.(parsed.data);
         if (!semantic) { validation("accepted", { value: parsed.data }); return parsed.data; }
         validation("semantic_mismatch", { issue: semantic, willRetry: attempt === 0 });
         this.log(`semantic mismatch from ${model}: ${semantic.code} at ${semantic.path}`);
         if (attempt === 1) { this.onFallback?.({ what: name, model, reason: `semantic: ${semantic.code}` }); return null; }
-        messages.push({ role: "user", content: semanticRepairNote(semantic) });
+        anchor = name === "action_proposal" ? repairAnchor(parsed.data, semantic) : null;
+        messages.push({ role: "user", content: [anchoredRepairNote(semantic, anchor),
+          ...(name === "reflection" ? [reflectionRepairFormat(schema, parsed.data)] : []),
+        ].join("\n") });
         continue;
       }
       const issue = parsed.error.issues[0];
-      validation("schema_mismatch", { issue, willRetry: attempt === 0 });
+      validation("schema_mismatch", { issue, issues: parsed.error.issues.slice(0, 12), willRetry: attempt === 0 });
       this.log(`schema mismatch from ${model}: ${issue?.message ?? "?"} at ${issue?.path.join(".") || "root"}${this.diagnostics.content ? `; got ${text.slice(0, 160)}` : ""}`);
       if (attempt === 1 || !issue) { this.onFallback?.({ what: name, model, reason: `schema: ${issue?.message ?? "?"}` }); return null; }
-      // the repair: the model sees its own answer and the one thing wrong with it, and gives the same answer inside the limits
-      messages.push({ role: "assistant", content: text }, { role: "user", content: repairNote(issue as Parameters<typeof repairNote>[0], raw) });
+      if (name === "action_proposal" && raw && typeof raw === "object" && "action" in raw) {
+        // Canonical optional-field failures can still preserve the operation.
+        anchor = repairAnchor(raw, { code: "schema_mismatch", path: issue.path.join("."), message: issue.message });
+      }
+      // Report the bounded set together: fixing only the first error wastes the
+      // sole repair on a response with another already-known schema violation.
+      // An invalid contextual desire ID can still be canonical Reflection JSON.
+      // Diagnose its prose now, so the sole repair also sees unsupported outcomes.
+      // This parse is diagnostic only: it never accepts the invalid response.
+      const canonicalReflection = name === "reflection" ? reflectionForDiagnostics(normalized) : null;
+      const semantic = canonicalReflection ? check?.(canonicalReflection as T) : null;
+      messages.push({ role: "assistant", content: text }, { role: "user", content: [
+        schemaRepairNote(parsed.error.issues as Parameters<typeof repairNote>[0][], raw),
+        ...(name === "reflection" ? [reflectionRepairFormat(schema)] : []),
+        ...(semantic ? [anchoredRepairNote(semantic, null)] : []),
+      ].join("\n") });
     }
     return null;
   }

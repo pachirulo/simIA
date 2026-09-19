@@ -2,11 +2,18 @@ import { desiresForMind, type PlanContext } from "@unwatched/engine";
 import { PLAN_SYSTEM } from "../prompts/plan.ts";
 import { personaBlock } from "../prompts/persona.ts";
 import { cachePersona, type CognitiveContext } from "./shared.ts";
+import { roleNote, observedMayor } from "../semantics/institution.ts";
+import { sourceAssertions } from "../semantics/sources.ts";
 
 export function planPrompt(ctx: PlanContext): string {
+  return roleNote(observedMayor(sourceAssertions(ctx.keyMemories.map((text, i) => ({ ref: `keyMemories[${i}]`, text }))), [ctx.agent.persona.name])) + "\n" + planNarrative(ctx);
+}
+
+function planNarrative(ctx: PlanContext): string {
   return `It is the morning of day ${ctx.day}, ${ctx.hour}:00, ${ctx.weather}. Make your own plan for today, in first person, as this person and nobody else. Not a to-do list for a game: what you actually want from the day, given what you have, who you know, and what you fear.
 Your lasting desires (you can choose among them or attend to something else): ${JSON.stringify(desiresForMind(ctx.agent.desires))}.
 Body now (0 satisfied, 1 urgent): ${JSON.stringify(ctx.agent.needs)}. Reserve feasible food/rest before optional goals; later urgent state can override any step.
+Carried inventory=${JSON.stringify(ctx.agent.inventory)}; repeated items represent quantities. Current inventory overrides old memories of scarcity. Owned resources are listed below; public funds require the relevant authority, not just a title. Unknown offers, travel time and other people's private resources remain unknown.
 What you carry: ${ctx.agent.coins} coins, ${ctx.agent.job ? `work as ${ctx.agent.job}` : "no work"}, ${ctx.agent.home ? `a bed at ${ctx.agent.home.place} paid for ${ctx.agent.home.nightsPaid} more nights` : "no bed of your own"}.
 Last night you thought: ${ctx.yesterday ?? "nothing yet; you arrived recently"}.${ctx.projects?.length ? `\nWhat you are working toward: ${ctx.projects.map((p) => `${p.title} (since day ${p.since}; ${p.progress})`).join("; ")}. Advance these when your current needs and resources permit.` : ""}
 What you meant to do next: ${ctx.intentions.join(" | ") || "nothing decided"}.

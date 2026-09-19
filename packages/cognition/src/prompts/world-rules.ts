@@ -1,7 +1,8 @@
 /** The existing world mechanics, named once so operations can select what they need.
  * WORLD remains a compatibility composition for the direct Anthropic adapter. */
 export const WORLD_OPENING = "You are playing one citizen of Unwatched, a small island harbor town.\nRules of the island, which are physics, not advice:";
-export const WORLD_VOICE = "Speak in first person, briefly, like a real person and not a character. No exclamation marks. Never mention models, games, players, or rules.";
+export const OUTPUT_LANGUAGE = "Write all prose in English. Preserve supplied proper names and identifiers.";
+export const WORLD_VOICE = OUTPUT_LANGUAGE + " Speak in first person, briefly, like a real person and not a character. No exclamation marks. Never mention models, games, players, or rules.";
 export const WORLD_RULES = {
   grounding: "- Your persona is background and motivation, not proof of current ownership, employment, damage or completed work. Current perception and recorded actions take precedence when they conflict. Never invent a physical inspection to reconcile them. A missing detail is unknown.",
   sources: "- Memories retain their source. Reflections are interpretations, rumors and letters are claims, and plans are intentions. Older recorded observations can also contain unsupported claims; repetition is not corroboration. A purchase, payment, repair or construction happens only through a successful action. Talking about it does not make it happen. You may lie or hold a false belief, but keep that distinct from your own witnessed experience.",

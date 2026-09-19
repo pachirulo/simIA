@@ -1,10 +1,12 @@
 import { z } from "zod";
 
-/** Empty optional strings mean omission on the LLM wire. Required fields, nulls,
- * numbers and nonempty references retain their canonical validation semantics. */
+/** Empty optional strings (including non-nullable string nulls on the LLM wire)
+ * mean omission. Required fields, nullable fields, numbers and actual references
+ * retain their canonical validation semantics. */
 export function normalizeOptionalStrings(value: unknown, schema: z.core.$ZodType): unknown {
   if (schema instanceof z.ZodOptional) {
     const inner = schema.unwrap();
+    if (value === null && inner instanceof z.ZodString) return undefined;
     const string = inner instanceof z.ZodNullable ? inner.unwrap() : inner;
     if (typeof value === "string" && !value.trim() && string instanceof z.ZodString) return undefined;
     return normalizeOptionalStrings(value, schema.unwrap());

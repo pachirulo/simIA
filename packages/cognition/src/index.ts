@@ -4,6 +4,8 @@ export { MockBrain } from "./mock.ts";
 export { AnthropicBrain } from "./anthropic.ts";
 export type { AnthropicBrainOptions } from "./anthropic.ts";
 export { seedPersonas } from "./personas.ts";
+export { logDialogue, spokenDialogue } from "./provider/dialogue-log.ts";
+export { worldPrimerOf } from "./context/world-primer.ts";
 export { OpenRouterBrain, chooseModel, SLOT_OF, PROSE_CAPS, trimProse, truncateProse, repairNote, markFallback, isFromFallback } from "./openrouter.ts";
 export type { OpenRouterBrainOptions, ProviderUsage, CallKind, Slot, Models } from "./openrouter.ts";
 

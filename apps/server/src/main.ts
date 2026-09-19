@@ -2,6 +2,7 @@ import { DigestCache } from "./digest-cache.ts";
 import { BoardingConnections, verifyBoardingKey } from "./boarding.ts";
 import { adminResolver, backofficeRoutes } from "./backoffice.ts";
 import { configureDeliveryLog } from "./delivery-log.ts";
+import { logDialogue } from "./dialogue-log.ts";
 import { telegramRoutes } from "./telegram-routes.ts";
 import { TelegramLetters } from "./telegram.ts";
 import { publicProject } from "./views.ts";
@@ -22,7 +23,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Town, Rng, MINUTES_PER_DAY, sha256, canonicalEvent } from "@unwatched/engine";
 import type { Brain } from "@unwatched/engine";
 import { Action, Persona, type TownEvent, type PersonaDepth, Passenger } from "@unwatched/protocol";
-import { MockBrain, AnthropicBrain, OpenRouterBrain, seedPersonas } from "@unwatched/cognition";
+import { MockBrain, AnthropicBrain, OpenRouterBrain, seedPersonas, worldPrimerOf } from "@unwatched/cognition";
 import { TownStore, FileStore } from "@unwatched/store";
 import { publicAgent, ownerAgent, clockOf, realClock, setPerks } from "./views.ts";
 import { BrainRouter, newToken, OwnBrain, OwnKeyBrain } from "./brains.ts";
@@ -121,7 +122,7 @@ if (subscriberBrain) {
 }
 if(telegramDb) metrics.onAttempt=(a,kind,outcome,duration,t)=>{void telegramDb.from('cognition_attempts').insert({agent_id:a?.id??null,kind,outcome,duration_ms:duration,island_minute:t,funding:a?.brainKind==='own_key'?'user_key':a?.brainKind==='own_brain'?'external_brain':a?.owner&&billing.wallet(a.owner).plan!=='none'?'subscriber':'world'}).then(({error})=>{if(error)log('Could not persist cognition diagnostic.');});};
 const hasPerks = (a: AgentState) => !a.owner || billing.wallet(a.owner).plan === "resident" || billing.planFor(a) === "patron"; setPerks(hasPerks); // the portrait and the voice come with a plan
-const town = new Town({ seed: SEED, brain: metrics, log, creditBank: billing.bank, idPrefix: TOWN_ID === "island" ? "" : TOWN_ID, name: TOWN_NAME, harbors: HARBORS.map((h) => ({ id: h.id, name: h.name })), onDepart: boatTo, onEvent: (e) => { if(e.kind==="town.of_age"){const grown=town.agents.get(e.actors[0]!);if(grown)billing.applyPlan(grown);} store?.sink(e); void telegram.deliver(e, () => { const a = town.agents.get(e.actors[0]!); return a ? { id: a.id, owner: a.owner, name: a.persona.name } : undefined; }); broadcast({ type: "event", event: publicEvent(e) }); if (e.kind === "town.built" && e.payload && (e.payload as { hash?: string }).hash) { const p = e.payload as { hash: string; look: string; what: "house" | "shop" }; void looks.ensure(p.hash, p.look, p.what); } if (e.kind === "town.book" && store && e.actors[0] && e.payload) { const p = e.payload as { title: string; text: string; epitaph: string; how: "left" | "died" | "exiled"; arrivedDay: number; leftDay: number; name: string }; void store.saveLife({ agentId: e.actors[0], name: p.name, title: p.title, text: p.text, epitaph: p.epitaph, how: p.how, arrivedDay: p.arrivedDay, leftDay: p.leftDay }).catch((err: Error) => log(`could not shelve the book: ${err.message}`)); } if (e.kind === "agent.leave" && store && e.actors[0]) { void store.markLeft(e.actors[0], e.t).then(() => store!.snapshot(town)).catch((err: Error) => log(`could not record the leaving: ${err.message}`)); } if (e.kind === "agent.letter" && e.actors[0]) { const a = town.agents.get(e.actors[0]); if (a?.owner) { void store?.saveLetter(a.id, a.owner, "to_owner", String(e.payload?.text ?? e.text), e.t, e.t); void noticeLetter(e).catch((err: Error) => log(`letter notice failed: ${err.message}`)); } } } });
+const town = new Town({ seed: SEED, brain: metrics, log, creditBank: billing.bank, idPrefix: TOWN_ID === "island" ? "" : TOWN_ID, name: TOWN_NAME, harbors: HARBORS.map((h) => ({ id: h.id, name: h.name })), onDepart: boatTo, onEvent: (e) => { logDialogue(e, id => town.agents.get(id)?.persona.name, log); if(e.kind==="town.of_age"){const grown=town.agents.get(e.actors[0]!);if(grown)billing.applyPlan(grown);} store?.sink(e); void telegram.deliver(e, () => { const a = town.agents.get(e.actors[0]!); return a ? { id: a.id, owner: a.owner, name: a.persona.name } : undefined; }); broadcast({ type: "event", event: publicEvent(e) }); if (e.kind === "town.built" && e.payload && (e.payload as { hash?: string }).hash) { const p = e.payload as { hash: string; look: string; what: "house" | "shop" }; void looks.ensure(p.hash, p.look, p.what); } if (e.kind === "town.book" && store && e.actors[0] && e.payload) { const p = e.payload as { title: string; text: string; epitaph: string; how: "left" | "died" | "exiled"; arrivedDay: number; leftDay: number; name: string }; void store.saveLife({ agentId: e.actors[0], name: p.name, title: p.title, text: p.text, epitaph: p.epitaph, how: p.how, arrivedDay: p.arrivedDay, leftDay: p.leftDay }).catch((err: Error) => log(`could not shelve the book: ${err.message}`)); } if (e.kind === "agent.leave" && store && e.actors[0]) { void store.markLeft(e.actors[0], e.t).then(() => store!.snapshot(town)).catch((err: Error) => log(`could not record the leaving: ${err.message}`)); } if (e.kind === "agent.letter" && e.actors[0]) { const a = town.agents.get(e.actors[0]); if (a?.owner) { void store?.saveLetter(a.id, a.owner, "to_owner", String(e.payload?.text ?? e.text), e.t, e.t); void noticeLetter(e).catch((err: Error) => log(`letter notice failed: ${err.message}`)); } } } });
 // the island in words, once, for the cached prefix every citizen shares: where things are, what is sold where, who hires, and the calendar
 town.npcThoughtInterval = 15;
 const waitingTown=new Town({seed:SEED,brain:new MockBrain(SEED)});
@@ -260,10 +261,7 @@ const sb = process.env.SUPABASE_URL && authKey ? createClient(process.env.SUPABA
 /** Who is asking. A Supabase JWT when the store exists; the X-Owner header in memory-only dev mode. */
 /** The island described plainly, for the shared prefix: stable for the life of the island, so it caches. */
 function primerOf(t: Town): string {
-  const places = [...t.places.values()].filter((p) => p.kind !== "plot").map((p) => `${p.id}: ${p.name}${p.sells.length ? `, sells ${p.sells.map((s) => s.item).join(", ")}` : ""}${p.beds ? `, beds ${p.beds.price ? `${p.beds.price} coins a night` : "free"}` : ""}`);
-  const jobs = t.pack.jobs.map((j) => `${j.title} at ${j.place}, ${j.wage} coins a shift, ${j.hours[0]} to ${j.hours[1]}`);
-  const feasts = t.pack.feasts.map((f) => `${f.name} on the ${f.day}th of month ${f.month} at ${f.place}`);
-  return `The island of ${t.name}:\nPlaces: ${places.join("; ")}.\nWork: ${jobs.join("; ")}.\nThe boat comes each morning; the six o'clock cart moves grain to the mill, flour to the bakery, bread and fish and apples to the market. Sundays have no shifts, Saturday is market day, the first of the month is council day.\nFeasts: ${feasts.join("; ")}.\nPlots for sale are listed in the morning plan; the council sells them.`;
+  return worldPrimerOf(t);
 }
 /** A person's depth, written once: how they talk, a habit, a skill, a flaw, why they came. The mock mind gives none, and that is fine. */
 type Enricher = { enrich(p: Persona, island: string): Promise<Partial<PersonaDepth> | null | undefined> };

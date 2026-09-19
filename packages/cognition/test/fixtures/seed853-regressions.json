@@ -1,0 +1,662 @@
+{
+  "source": {
+    "consoleSha256": "d9d0f5569e2b0425a26b6da83a5071c4a985d866e78d9e3b3552be205625e2eb",
+    "eventsSha256": "33599524fc35b13907d71461ac155b9e5c0ccec10eac0f572faaf716c1645abb",
+    "seed": 853,
+    "days": 1,
+    "tick": 60,
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "note": "Outputs and selected evidence extracted verbatim from original provider requests; remaining test context is synthetic."
+  },
+  "dialogue": {
+    "id": "gen-1789719490-4ehPcHvgpAy1JjpRBuai",
+    "attempt": 1,
+    "output": {
+      "lines": [
+        {
+          "speaker": "Petar Ilić",
+          "text": "Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?"
+        },
+        {
+          "speaker": "Rosa Vidal",
+          "text": "It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road."
+        },
+        {
+          "speaker": "Petar Ilić",
+          "text": "I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well."
+        },
+        {
+          "speaker": "Rosa Vidal",
+          "text": "You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest."
+        },
+        {
+          "speaker": "Petar Ilić",
+          "text": "Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?"
+        }
+      ],
+      "outcome": {
+        "a_remember": "Petar brought a loaf, said mill still broken, may be fixed next week. Quarry not hiring until month turns. He admitted mainland flour doesn't hold well, then asked about council meeting. I agreed to trade soup for bread and keep quiet about the flour rumor.",
+        "a_trust_delta": 0.05,
+        "b_remember": "Rosa took the loaf, offered soup, promised not to spread the mainland flour business. I mentioned the mill situation and quarry hiring. Asked her about council meeting; didn't get an answer yet.",
+        "b_trust_delta": 0.1,
+        "rumor": null
+      }
+    },
+    "aMemories": [
+      "[minute 600; reported speech, not verified experience] Petar Ilić is mayor now.",
+      "[minute 360; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says.” Petar Ilić: “Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today.” Rosa Vidal: “Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any.” Petar Ilić: “Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around.” Rosa Vidal: “What I hear stays here. Come by anytime before dark.”",
+      "[minute 960; personal interpretation, not verified experience] My interpretation of the conversation with Petar Ilić: Agreed to trade soup tonight for a loaf of bread from Petar, after he checks the mill. He asked me not to spread the rumor about mainland flour; I said I wouldn't.",
+      "[minute 360; personal interpretation, not verified experience] My interpretation of the conversation with Petar Ilić: B said he might take a quarry shift today; agreed to bring a loaf tonight in trade for soup. B asked me not to spread the rumor about mainland flour, which he didn't deny.",
+      "[minute 540; letter, not verified experience] I wrote to whoever sent me: \"Off to the council in a bit. Petar says the mill's run by fools and he might take a quarry shift. I've got work at the inn and 40 coins. Town's quiet on a Sunday.\""
+    ],
+    "bMemories": [
+      "[minute 360; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says.” Petar Ilić: “Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today.” Rosa Vidal: “Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any.” Petar Ilić: “Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around.” Rosa Vidal: “What I hear stays here. Come by anytime before dark.”",
+      "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+      "[minute 960; personal interpretation, not verified experience] My interpretation of the conversation with Rosa Vidal: Rosa agreed to give me soup tonight in exchange for a loaf, after I check the mill. I reminded her not to spread the rumor about mainland flour; she said she wouldn't.",
+      "[minute 360; reported speech, not verified experience] Rosa Vidal told me: I heard from port gossip that Petar Ilić has been buying mainland flour at a loss.",
+      "[minute 360; personal interpretation, not verified experience] My interpretation of the conversation with Rosa Vidal: A repeated the rumor that I buy mainland flour at a loss; I didn't confirm it. I agreed to bring a loaf tonight in exchange for soup, after checking the mill."
+    ]
+  },
+  "reflection": {
+    "id": "gen-1789719552-zFn7ZshL6CFKSRZB97Zj",
+    "attempt": 2,
+    "output": {
+      "beliefs": [
+        {
+          "about": "Petar Ilić",
+          "belief": "Petar is reliable for a trade but likes to keep his mainland flour secret",
+          "confidence": 0.7
+        },
+        {
+          "about": "the mill",
+          "belief": "The mill is broken and can't grind local grain, so Petar buys mainland flour at a loss",
+          "confidence": 0.8
+        },
+        {
+          "about": "the quarry",
+          "belief": "The quarry isn't hiring until the month turns",
+          "confidence": 0.9
+        }
+      ],
+      "desires": [],
+      "insights": [
+        "I've got a job at the inn and a place to sleep, so I've planted my feet on the first day.",
+        "Petar's the mayor and he's got troubles with the mill and quarry, but he still came through with that loaf — that's the kind of connection that matters.",
+        "I keep a ledger in my head of who owes what, and Petar owes me a loaf until he brings it, but my lips are sealed about his flour."
+      ],
+      "intentions": [
+        "Work a shift at the inn tomorrow and see who comes through, so I can learn more names.",
+        "Ask Petar about the council meeting when I see him, because he brought it up and I want to know what's happening.",
+        "Keep gathering gossip about the mill and the quarry, so I can be the one who knows the town's business."
+      ],
+      "letter_to_owner": null,
+      "opinions": [
+        {
+          "about": "Petar Ilić",
+          "opinion": "He's a bit gruff and secretive, but he kept his word about the loaf and trusts me with the mainland flour thing. He's someone worth knowing.",
+          "trust_delta": 0.05
+        }
+      ],
+      "projects": [
+        {
+          "title": "Make the inn the heart of town",
+          "why": "I want the inn to be where people gather, and I've started by working here and getting to know the regulars like Petar."
+        },
+        {
+          "title": "Keep track of who owes whom",
+          "why": "My secret ledger of debts helps me understand everyone's place in town, and I've already noted Petar's loaf and his flour secret."
+        }
+      ],
+      "saying": "What I hear stays here.",
+      "self": {
+        "advice": "Trust the people who keep their word, but keep a ledger of what they owe.",
+        "fear": "Being left out of the town's news and shifts.",
+        "strangers": "Warm and quick to learn a name, but I hold back the details until I know them.",
+        "summary": "I'm Rosa Vidal, back on the island where I grew up, working the inn and remembering that a town runs on bread and secrets.",
+        "want": "To make this inn the center of town, one bowl of soup at a time."
+      },
+      "summary": "Today I stepped off the boat with 40 coins and found my place. I got taken on as help at the inn, which suits me, and I talked with Petar Ilić twice — that man's the mayor, though he's moaning about the mill and the quarry. He brought me a loaf like he said, even if it's a bit stale, and he told me to keep quiet about him buying mainland flour. I kept my word. I bought bread for myself twice and ate it, and I walked to the council hall and the market, but town stays quiet on Sunday. I've got 38 coins left, two nights paid at the inn, and a job. I meant to ask around at the harbor and take a dock shift today, but I got caught up at the inn and with Petar, so those steps missed. That's fine. I'm in no rush. I've got my ledger in my head, and I'm watching who comes and goes.",
+      "watch": [
+        "Petar Ilić",
+        "the mill",
+        "the quarry",
+        "the harbor inn"
+      ]
+    }
+  },
+  "evidence": {
+    "actionEvidence": [
+      "[event 14, minute 480, agent.hired] Rosa Vidal was taken on as help at the inn.",
+      "[event 31, minute 780, agent.trade] Rosa Vidal bought bread for 1.",
+      "[event 46, minute 1080, agent.trade] Rosa Vidal bought bread for 1."
+    ],
+    "dayMemories": [
+      "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+      "[minute 480; recorded observation; quoted claims remain claims] I got work as help at the inn. 2 coins a shift.",
+      "[minute 360; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says.” Petar Ilić: “Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today.” Rosa Vidal: “Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any.” Petar Ilić: “Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around.” Rosa Vidal: “What I hear stays here. Come by anytime before dark.”",
+      "[minute 360; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 720; recorded observation; quoted claims remain claims] Observed local state at the council hall (council): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 840; recorded observation; quoted claims remain claims] Observed local state at the market square (market): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+      "[minute 540; letter, not verified experience] I wrote to whoever sent me: \"Off to the council in a bit. Petar says the mill's run by fools and he might take a quarry shift. I've got work at the inn and 40 coins. Town's quiet on a Sunday.\"",
+      "[minute 1200; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?” Rosa Vidal: “It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road.” Petar Ilić: “I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well.” Rosa Vidal: “You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest.” Petar Ilić: “Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?”",
+      "[minute 600; reported speech, not verified experience] Petar Ilić is mayor now.",
+      "[minute 360; intention, not completed work] What I meant to do today: find my footing in town; earn some coins; meet people",
+      "[minute 420; recorded observation; quoted claims remain claims] I said: \"Morning, Petar. I'll take a bowl of soup and a loaf, and you can keep the change for the loaf you're bringing later.\"",
+      "[minute 960; recorded observation; quoted claims remain claims] I said: \"Petar, you still owe me that loaf. I'll take a bowl of soup now and the bread whenever you bring it.\""
+    ],
+    "keyMemories": [
+      "[minute 1200; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?” Rosa Vidal: “It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road.” Petar Ilić: “I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well.” Rosa Vidal: “You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest.” Petar Ilić: “Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?”",
+      "[minute 540; letter, not verified experience] I wrote to whoever sent me: \"Off to the council in a bit. Petar says the mill's run by fools and he might take a quarry shift. I've got work at the inn and 40 coins. Town's quiet on a Sunday.\"",
+      "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+      "[minute 480; recorded observation; quoted claims remain claims] I got work as help at the inn. 2 coins a shift.",
+      "[minute 360; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says.” Petar Ilić: “Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today.” Rosa Vidal: “Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any.” Petar Ilić: “Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around.” Rosa Vidal: “What I hear stays here. Come by anytime before dark.”",
+      "[minute 360; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details."
+    ],
+    "desireEvidence": [
+      {
+        "id": 1,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.arrive",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal arrived on the boat.",
+        "importance": 0.5,
+        "place": "harbor"
+      },
+      {
+        "id": 3,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.plan",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal set out to find my footing in town",
+        "importance": 0.15,
+        "place": "harbor",
+        "payload": {
+          "goals": [
+            "find my footing in town",
+            "earn some coins",
+            "meet people"
+          ],
+          "mood": "tired but curious"
+        }
+      },
+      {
+        "id": 5,
+        "t": 360,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to the harbor inn.",
+        "importance": 0.02,
+        "place": "inn"
+      },
+      {
+        "id": 7,
+        "t": 360,
+        "day": 1,
+        "kind": "conversation",
+        "actors": [
+          "ag_1",
+          "ag_2"
+        ],
+        "text": "Rosa Vidal and Petar Ilić talked at the harbor inn. Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buyi",
+        "importance": 0.67,
+        "place": "inn",
+        "payload": {
+          "lines": [
+            {
+              "speaker": "ag_2",
+              "text": "Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "What I hear stays here. Come by anytime before dark."
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "t": 420,
+        "day": 1,
+        "kind": "agent.say",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal: “Morning, Petar. I'll take a bowl of soup and a loaf, and you can keep the change for the loaf you're bringing later.”",
+        "importance": 0.15,
+        "place": "inn"
+      },
+      {
+        "id": 14,
+        "t": 480,
+        "day": 1,
+        "kind": "agent.hired",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal was taken on as help at the inn.",
+        "importance": 0.5,
+        "place": "inn",
+        "payload": {
+          "because": "find honest work"
+        }
+      },
+      {
+        "id": 22,
+        "t": 600,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to the market square, on the way to the council hall.",
+        "importance": 0.02,
+        "place": "market"
+      },
+      {
+        "id": 25,
+        "t": 660,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to the council hall.",
+        "importance": 0.02,
+        "place": "council"
+      },
+      {
+        "id": 28,
+        "t": 720,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to the market square.",
+        "importance": 0.02,
+        "place": "market",
+        "payload": {
+          "because": "Head to the market to see what's there and introduce myself on a Sunday afternoon."
+        }
+      },
+      {
+        "id": 31,
+        "t": 780,
+        "day": 1,
+        "kind": "agent.trade",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal bought bread for 1.",
+        "importance": 0.02,
+        "place": "market"
+      },
+      {
+        "id": 34,
+        "t": 840,
+        "day": 1,
+        "kind": "agent.eat",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal ate bread.",
+        "importance": 0.01,
+        "place": "market",
+        "payload": {
+          "because": "Eat the bread I'm carrying to stop the hunger."
+        }
+      },
+      {
+        "id": 37,
+        "t": 900,
+        "day": 1,
+        "kind": "agent.move",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to the harbor inn.",
+        "importance": 0.02,
+        "place": "inn"
+      },
+      {
+        "id": 40,
+        "t": 960,
+        "day": 1,
+        "kind": "agent.say",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal: “Petar, you still owe me that loaf. I'll take a bowl of soup now and the bread whenever you bring it.”",
+        "importance": 0.15,
+        "place": "inn",
+        "payload": {
+          "because": "Remind Petar of our trade so I can eat."
+        }
+      },
+      {
+        "id": 42,
+        "t": 960,
+        "day": 1,
+        "kind": "conversation",
+        "actors": [
+          "ag_1",
+          "ag_2"
+        ],
+        "text": "Rosa Vidal and Petar Ilić talked at the harbor inn. Rosa Vidal: “Petar, you're here early. Soup's nearly ready, and I've got a table by the window if you want it.” Petar Ilić: “Soup can wait. I just came from the mill—those fools still can'",
+        "importance": 0.12,
+        "place": "inn",
+        "payload": {
+          "lines": [
+            {
+              "speaker": "ag_1",
+              "text": "Petar, you're here early. Soup's nearly ready, and I've got a table by the window if you want it."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Soup can wait. I just came from the mill—those fools still can't grind local grain worth a damn. I'm thinking of taking a quarry shift to earn some coin before dark."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "Quarry's hot work, but it pays. And since you're here, you owe me that loaf from this morning—I've got a pot simmering that'd go well with it."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Aye, I remember. I'll bring a loaf after I check the mill's grain supply. Don't go telling everyone about the mainland flour—that stays between us."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "My lips are sealed, Petar. Come by before dark, and I'll have your soup hot."
+            }
+          ]
+        }
+      },
+      {
+        "id": 46,
+        "t": 1080,
+        "day": 1,
+        "kind": "agent.trade",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal bought bread for 1.",
+        "importance": 0.02,
+        "place": "inn"
+      },
+      {
+        "id": 49,
+        "t": 1140,
+        "day": 1,
+        "kind": "agent.eat",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal ate bread.",
+        "importance": 0.01,
+        "place": "inn"
+      },
+      {
+        "id": 51,
+        "t": 1200,
+        "day": 1,
+        "kind": "conversation",
+        "actors": [
+          "ag_1",
+          "ag_2"
+        ],
+        "text": "Rosa Vidal and Petar Ilić talked at the harbor inn. Petar Ilić: “Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?” Rosa Vidal: “It's been simmering since noon. Come in, sit b",
+        "importance": 0.5700000000000001,
+        "place": "inn",
+        "payload": {
+          "lines": [
+            {
+              "speaker": "ag_2",
+              "text": "Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?"
+            },
+            {
+              "speaker": "ag_1",
+              "text": "It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well."
+            },
+            {
+              "speaker": "ag_1",
+              "text": "You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest."
+            },
+            {
+              "speaker": "ag_2",
+              "text": "Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?"
+            }
+          ]
+        }
+      },
+      {
+        "id": 52,
+        "t": 1260,
+        "day": 1,
+        "kind": "agent.sleep",
+        "actors": [
+          "ag_1"
+        ],
+        "text": "Rosa Vidal went to sleep at the harbor inn.",
+        "importance": 0.01,
+        "place": "inn"
+      }
+    ]
+  },
+  "decision": {
+    "id": "gen-1789719507-5Fr2fYOy2ceIM3UXoSib",
+    "attempt": 1,
+    "output": {
+      "action": {
+        "kind": "use",
+        "item": "soup"
+      },
+      "intent": "Rosa gave me soup for the loaf, but I see it's not in my inventory anymore. I'm still hungry, so I'll buy a bowl of soup from the inn and eat it now to get something in me before bed.",
+      "remember": []
+    },
+    "perception": {
+      "type": "perceive",
+      "agent_id": "ag_2",
+      "town": {
+        "rules": [],
+        "sayings": [],
+        "people": [
+          {
+            "name": "Rosa Vidal",
+            "place": "inn",
+            "asleep": true
+          }
+        ]
+      },
+      "time": {
+        "sim": "day 1 21:00",
+        "day": 1,
+        "minute": 1260,
+        "season": "winter",
+        "weather": "clear",
+        "weekday": "Sunday",
+        "occasion": "council day: the mayor is chosen at the council hall and the month's business is done"
+      },
+      "self": {
+        "location": "inn",
+        "needs": {
+          "hunger": 0.616,
+          "rest": 1,
+          "social": 0.06396252456307411
+        },
+        "feels": {
+          "hunger": "hungry",
+          "rest": "exhausted",
+          "social": "content"
+        },
+        "coins": 38,
+        "inventory": [
+          "suitcase"
+        ],
+        "job": null,
+        "shift": null,
+        "debts": [],
+        "days_hungry": 0,
+        "weak": false,
+        "family": {
+          "partner": null,
+          "children": []
+        },
+        "owns": [],
+        "housing": {
+          "kind": "inn",
+          "nights_left": 3
+        },
+        "mayor": true,
+        "learned_food": [
+          {
+            "place": "inn",
+            "item": "soup",
+            "confidence": 0.6648380153309325,
+            "observations": 1
+          }
+        ]
+      },
+      "nearby": [
+        {
+          "agent": "ag_1",
+          "name": "Rosa Vidal",
+          "relation": {
+            "trust": 0.35,
+            "affection": 0.32499999999999996,
+            "opinion": ""
+          },
+          "asleep": true
+        }
+      ],
+      "place": {
+        "id": "inn",
+        "name": "the harbor inn",
+        "kind": "inn",
+        "for_sale": [
+          {
+            "item": "soup",
+            "price": 2
+          },
+          {
+            "item": "bread",
+            "price": 1
+          }
+        ],
+        "jobs_open": [
+          "inn.help"
+        ],
+        "exits": [
+          "harbor",
+          "market"
+        ],
+        "owner": null,
+        "broken": false
+      },
+      "heard": [],
+      "recent": [
+        "[minute 1200; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?” Rosa Vidal: “It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road.” Petar Ilić: “I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well.” Rosa Vidal: “You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest.” Petar Ilić: “Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?”",
+        "[minute 600; recorded observation; quoted claims remain claims] The council made me mayor. The treasury is mine to spend on the island, and the island is watching.",
+        "[minute 1200; personal interpretation, not verified experience] My interpretation of the conversation with Rosa Vidal: Rosa took the loaf, offered soup, promised not to spread the mainland flour business. I mentioned the mill situation and quarry hiring. Asked her about council meeting; didn't get an answer yet.",
+        "[minute 360; reported speech, not verified experience] Conversation at the harbor inn: Petar Ilić: “Rosa, you're up early. Your soup's getting thin since I stopped sending day-old loaves.” Rosa Vidal: “That's because you're sulking about the mill. But I hear you've been buying mainland flour at a loss—that's what the port gossip says.” Petar Ilić: “Gossip's cheap. The mill's run by fools who can't get local grain anyway. You know the quarry's hiring—I might take a shift there today.” Rosa Vidal: “Quarry's hot work. But if you're free tonight, I'll trade you a bowl of soup for a loaf—if you still have any.” Petar Ilić: “Fine. I'll bring a loaf after I check the mill. Don't spread that mainland thing around.” Rosa Vidal: “What I hear stays here. Come by anytime before dark.”",
+        "[minute 360; recorded observation; quoted claims remain claims] Stepped off the boat with a suitcase and 40 coins. Three nights paid at the harbor inn.",
+        "[minute 840; recorded observation; quoted claims remain claims] Observed local state at the mill (mill): no active damage recorded; no construction site. This does not reveal unmodeled structural details.",
+        "[minute 960; personal interpretation, not verified experience] My interpretation of the conversation with Rosa Vidal: Rosa agreed to give me soup tonight in exchange for a loaf, after I check the mill. I reminded her not to spread the rumor about mainland flour; she said she wouldn't.",
+        "[minute 360; recorded observation; quoted claims remain claims] Observed local state at the harbor inn (inn): no active damage recorded; no construction site. This does not reveal unmodeled structural details."
+      ],
+      "owner_letters": [],
+      "crossroads": "Rosa Vidal and Petar Ilić talked at the harbor inn. Petar Ilić: “Rosa, I brought the loaf. The mill's still broken, but they're talking about fixing it by next week. Soup's ready?” Rosa Vidal: “It's been simmering since noon. Come in, sit by the fire. You look like you walked the whole coast road.” Petar Ilić: “I checked the quarry too. They're not hiring until the month turns. Bread's a bit stale, I'll admit—mainland flour doesn't hold as well.” Rosa Vidal: “You said not to spread that. I haven't. But I'll trade you soup for that loaf, and I'll keep my mouth shut about the rest.” Petar Ilić: “Obliged. If the mill gets going, I'll send you fresh loaves again, not these old ones. You heard anything about the council meeting?”",
+      "today": {
+        "mood": "tired and wary, but hopeful for the mill",
+        "goals": [
+          "find out how the mill is doing and whether it uses local grain",
+          "earn some coins to start saving for the bakery"
+        ],
+        "steps": [
+          {
+            "hour": 6,
+            "do": "get breakfast at the inn",
+            "place": "inn",
+            "done": true
+          },
+          {
+            "hour": 7,
+            "do": "walk to the mill and see who works there and what they mill",
+            "place": "mill",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 8,
+            "do": "ask the miller about flour supply and if they use local grain",
+            "place": "mill",
+            "done": false,
+            "missed": true
+          },
+          {
+            "hour": 10,
+            "do": "work as a mill hand for a shift",
+            "place": "mill",
+            "done": true
+          },
+          {
+            "hour": 15,
+            "do": "rest and eat at the inn",
+            "place": "inn",
+            "done": true
+          }
+        ]
+      },
+      "options": [
+        "move",
+        "say",
+        "give",
+        "take",
+        "use",
+        "work",
+        "apply",
+        "quit",
+        "trade",
+        "propose",
+        "vote",
+        "write",
+        "message_owner",
+        "sleep",
+        "wait",
+        "do",
+        "propose_skill",
+        "teach",
+        "lend",
+        "call"
+      ],
+      "deadline_ms": 8000
+    }
+  }
+}

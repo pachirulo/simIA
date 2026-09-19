@@ -467,8 +467,19 @@ export class Town {
       case "accept": case "refuse": return action.from ? { ...action, from: this.resolveRef(action.from, near) } : action;
       case "settle": return action.to ? { ...action, to: this.resolveRef(action.to, near) } : action;
       case "accuse": return { ...action, who: this.resolveRef(action.who, [...this.agents.values()]) };
-      // asking for work without naming the post means whatever is open here, or the post whose title they used
-      case "apply": { if (action.job && this.jobs.has(action.job)) return action; const here = this.openJobsAt(a.location); const named = action.job ? here.find((j) => j.title.toLowerCase().includes(action.job!.toLowerCase()) || j.id.includes(action.job!.toLowerCase())) : undefined; return { ...action, job: (named ?? here[0])?.id ?? action.job ?? "" }; }
+      case "apply": {
+        const here = this.openJobsAt(a.location);
+        // Only an unspecified post may use the first compatible opening.
+        if (!action.job) return { ...action, job: here[0]?.id ?? "" };
+        if (this.jobs.has(action.job)) return action;
+        const query = action.job.trim().toLowerCase();
+        if (!query) return action;
+        // Exact names retain their identity even when remote/full: validation
+        // must reject that job rather than substitute another local opening.
+        const exact = [...this.jobs.values()].filter(j => j.id.toLowerCase() === query || j.title.toLowerCase() === query);
+        const matches = exact.length ? exact : here.filter(j => j.title.toLowerCase().includes(query) || j.id.toLowerCase().includes(query));
+        return matches.length === 1 ? { ...action, job: matches[0]!.id } : action;
+      }
       case "write": return action.about ? { ...action, about: this.resolveRef(action.about, [...this.agents.values()]) } : action;
       case "take": return action.from ? { ...action, from: this.resolveRef(action.from, near) } : action;
       case "trade": {
